@@ -1,0 +1,41 @@
+server:
+  port: 7777
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/car_owner_bbs?characterEncoding=utf-8&serverTimezone=Asia/Shanghai
+    username: root
+    password: 835282hlw
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  servlet:
+    multipart:
+      max-file-size: 2MB
+      max-request-size: 5MB
+  rabbitmq:
+    host: 127.0.0.1
+    port: 5672
+    virtual-host: /
+    username: leeway
+    password: 123321
+    listener:
+      simple:
+        # 消费者确认功能
+        acknowledge-mode: manual
+        prefetch: 100
+    # 开启发送确认
+#    publisher-confirm-type: correlated
+    # 开启发送失败退回
+#    publisher-returns: true
+mybatis-plus:
+  configuration:
+    # 日志
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      logic-delete-field: delFlag
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+      id-type: auto
+oss:
+  assessKey: 4H6GgJSoAwruJJrKsWgFXgub7MAC7qkBIRWa1CRb
+  secretKey: Y9Pok7mDyW3MSPYGyT-wtFmnx-klqbW9NXhW1l4T
+  bucket: car-owner-bbs
