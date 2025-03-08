@@ -70,4 +70,10 @@ public class SystemConstants {
      * 热门文章判定阈值
      */
     public static final int HOT_ARTICLE_VIEW_COUNT = 100;
+
+    /**
+     * 文章浏览量单次批量处理阈值
+     * 避免一次处理过多数据
+     */
+    public static final int VIEW_COUNT_SINGLE_SYNC_COUNT = 20;
 }
