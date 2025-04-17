@@ -1,8 +1,11 @@
 package com.ori.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.ori.domain.dto.AddCommentDto;
 import com.ori.domain.entity.Comment;
 import com.ori.domain.vo.PageVo;
+
+import java.util.List;
 
 
 /**
@@ -27,7 +30,22 @@ public interface CommentService extends IService<Comment> {
     /**
      * 添加评论
      *
-     * @param comment
+     * @param addCommentDto
      */
-    void addComment(Comment comment);
+    void addComment(AddCommentDto addCommentDto);
+
+    /**
+     * 查询文章的评论数量
+     *
+     * @param id 文章ID
+     * @return 文章的评论数量
+     */
+    Integer commentCount(Long id);
+
+    /**
+     * 删除评论
+     *
+     * @param ids 评论ID集合
+     */
+    void deleteComment(List<Long> ids);
 }

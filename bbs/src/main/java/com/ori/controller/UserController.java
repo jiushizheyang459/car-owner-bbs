@@ -8,6 +8,8 @@ import com.ori.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/user")
 public class UserController {
@@ -36,5 +38,16 @@ public class UserController {
     public ResponseResult register(@RequestBody User user) {
         userService.register(user);
         return ResponseResult.okResult();
+    }
+
+    /**
+     * 查询推荐关注
+     *
+     * @return 根据发布文章浏览量从高到低排序的前5个用户
+     */
+    @GetMapping("/getRecommendedAttention")
+    public ResponseResult getRecommendedAttention() {
+        List<UserInfoVo> vos = userService.getRecommendedAttention();
+        return ResponseResult.okResult(vos);
     }
 }

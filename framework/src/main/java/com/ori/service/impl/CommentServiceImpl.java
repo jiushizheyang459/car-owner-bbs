@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ori.constants.SystemConstants;
+import com.ori.domain.dto.AddCommentDto;
+import com.ori.domain.entity.Category;
 import com.ori.domain.entity.Comment;
 import com.ori.domain.entity.User;
 import com.ori.domain.vo.CommentVo;
@@ -13,6 +15,7 @@ import com.ori.exception.SystemException;
 import com.ori.mapper.CommentMapper;
 import com.ori.mapper.UserMapper;
 import com.ori.service.CommentService;
+import com.ori.utils.BeanCopyUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -143,10 +146,32 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
     }
 
     @Override
-    public void addComment(Comment comment) {
+    public void addComment(AddCommentDto addCommentDto) {
+        Comment comment = BeanCopyUtils.copyBean(addCommentDto, Comment.class);
+
         if (!StringUtils.hasText(comment.getContent())) {
             throw new SystemException(AppHttpCodeEnum.CONTENT_NOT_NULL);
         }
         save(comment);
+    }
+
+    @Override
+    public Integer commentCount(Long id) {
+        Integer count = lambdaQuery()
+                .eq(Comment::getArticleId, id)
+                .eq(Comment::getType, 0)
+                .eq(Comment::getDelFlag, 0)
+                .count();
+        return count;
+    }
+
+    @Override
+    public void deleteComment(List<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            throw new SystemException(AppHttpCodeEnum.COMMENT_IDS_NOT_NULL);
+        }
+        lambdaUpdate()
+                .set(Comment::getDelFlag, 1)
+                .in(Comment::getId, ids);
     }
 }

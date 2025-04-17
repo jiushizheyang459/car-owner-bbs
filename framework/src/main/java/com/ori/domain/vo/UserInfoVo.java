@@ -1,5 +1,6 @@
 package com.ori.domain.vo;
 
+import com.ori.domain.entity.User;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -18,7 +19,15 @@ public class UserInfoVo {
      */
     private String avatar;
 
-    private String sex;
+    private Integer sex;
 
     private String email;
+
+    public UserInfoVo(User key) {
+        this.id = key.getId();
+        this.nickName = key.getNickName();
+        this.avatar = key.getAvatar();
+        this.sex = key.getSex();
+        this.email = key.getEmail();
+    }
 }

@@ -2,13 +2,13 @@ package com.ori.controller;
 
 
 import com.ori.domain.ResponseResult;
+import com.ori.domain.dto.AddLinkDto;
+import com.ori.domain.dto.UpdateLinkDto;
 import com.ori.domain.entity.Link;
 import com.ori.domain.vo.LinkVo;
 import com.ori.service.LinkService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -34,6 +34,42 @@ public class LinkController {
     public ResponseResult linkList() {
         List<LinkVo> vos = linkService.linkList();
         return ResponseResult.okResult(vos);
+    }
+
+    /**
+     * 新增友情链接
+     *
+     * @param addLinkDto 要新增友情链接数据
+     * @return 新增结果
+     */
+    @PostMapping
+    public ResponseResult addLink(@RequestBody AddLinkDto addLinkDto) {
+        linkService.addLink(addLinkDto);
+        return ResponseResult.okResult();
+    }
+
+    /**
+     * 修改友情链接
+     *
+     * @param updateLinkDto 要修改的友情链接数据
+     * @return 修改结果
+     */
+    @PutMapping
+    public ResponseResult updateLink(@RequestBody UpdateLinkDto updateLinkDto) {
+        linkService.updateLink(updateLinkDto);
+        return ResponseResult.okResult();
+    }
+
+    /**
+     * 删除友情链接
+     *
+     * @param ids 友情链接ID集合
+     * @return 删除结果
+     */
+    @DeleteMapping
+    public ResponseResult deleteLink(@RequestParam List<Long> ids) {
+        linkService.deleteLink(ids);
+        return ResponseResult.okResult();
     }
 }
 

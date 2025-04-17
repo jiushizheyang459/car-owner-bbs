@@ -47,7 +47,7 @@ public class ArticleListVo {
     /**
      * 评论数量
      */
-    private Long commentCount;
+    private Integer commentCount;
 
     /**
      * 浏览数量

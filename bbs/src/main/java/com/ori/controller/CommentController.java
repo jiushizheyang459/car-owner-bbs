@@ -14,6 +14,8 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
  * 评论表(Comment)表控制层
  *
@@ -44,13 +46,25 @@ public class CommentController{
         return ResponseResult.okResult(vo);
     }
 
+    /**
+     * 发表评论
+     *
+     * @param addCommentDto 发表内容
+     * @return 发表成功结果
+     */
     @PostMapping
     public ResponseResult addComment(@RequestBody AddCommentDto addCommentDto) {
-        Comment comment = BeanCopyUtils.copyBean(addCommentDto, Comment.class);
-        commentService.addComment(comment);
+        commentService.addComment(addCommentDto);
         return ResponseResult.okResult();
     }
 
+    /**
+     * 分页查询友情链接的评论
+     *
+     * @param pageNum 页码
+     * @param size 每页多少条
+     * @return 分页查询结果
+     */
     @GetMapping("/linkCommentList")
     @ApiOperation(value = "友联评论列表", notes = "获取一页友链评论")
     @ApiImplicitParams({
@@ -60,6 +74,30 @@ public class CommentController{
     public ResponseResult linkCommentList(Integer pageNum, Integer size) {
         PageVo vo = commentService.commentList(SystemConstants.LINK_COMMENT, null, pageNum, size);
         return ResponseResult.okResult(vo);
+    }
+
+    /**
+     * 查询文章的评论数量
+     *
+     * @param id 文章ID
+     * @return 文章的评论数量
+     */
+    @GetMapping("/commentCount")
+    public ResponseResult commentCount(@PathVariable("id") Long id) {
+        Integer count = commentService.commentCount(id);
+        return ResponseResult.okResult(count);
+    }
+
+    /**
+     * 删除评论
+     *
+     * @param ids 评论ID集合
+     * @return 删除结果
+     */
+    @DeleteMapping
+    public ResponseResult deleteComment(@RequestParam List<Long> ids) {
+        commentService.deleteComment(ids);
+        return ResponseResult.okResult();
     }
 }
 

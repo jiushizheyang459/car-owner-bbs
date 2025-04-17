@@ -12,6 +12,16 @@ public class SystemConstants {
     public static final int ARTICLE_STATUS_NORMAL = 0;
 
     /**
+     * 资讯是草稿状态
+     */
+    public static final int INFORMATION_STATUS_DRAFT = 1;
+
+    /**
+     * 资讯是发布状态
+     */
+    public static final int INFORMATION_STATUS_NORMAL = 0;
+
+    /**
      * 分类是可用状态
      */
     public static final int CATEGORY_STATUS_NORMAL = 0;

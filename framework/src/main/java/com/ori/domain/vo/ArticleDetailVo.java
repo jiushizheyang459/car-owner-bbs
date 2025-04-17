@@ -4,6 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -11,7 +14,7 @@ public class ArticleDetailVo {
     /**
      * ID
      */
-    private String id;
+    private Long id;
 
     /**
      * 品牌名
@@ -21,7 +24,7 @@ public class ArticleDetailVo {
     /**
      * 文章状态
      */
-    private String status;
+    private Integer status;
 
     /**
      * 摘要
@@ -51,10 +54,10 @@ public class ArticleDetailVo {
     /**
      * 创作时间
      */
-    private String createTime;
+    private LocalDateTime createTime;
 
     /**
      * 浏览量
      */
-    private String viewCount;
+    private Long viewCount;
 }

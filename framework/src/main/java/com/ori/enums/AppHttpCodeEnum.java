@@ -17,7 +17,32 @@ public enum AppHttpCodeEnum { // 成功
     NICKNAME_NOT_NULL(509, "昵称不能为空"),
     PSSWORD_NOT_NULL(510, "密码不能为空"),
     EMAIL_NOT_NULL(511, "邮箱不能为空"),
-    NICKNAME_EXIST(511, "昵称已存在");
+    NICKNAME_EXIST(512, "昵称已存在"),
+    FOLLOWED_EXIST(513, "不可以重复关注同一用户"),
+    FOLLOWER_EXIST(514, "关注不存在"),
+    INFORMATION_NOT_NULL(515, "资讯内容不为空"),
+    INFORMATION_NOT_FOUND(516, "未查询到资讯"),
+    INFORMATION_IDS_NOT_NULL(517, "要删除的资讯ID集合为空"),
+    ADVERTISEMENT_NOT_NULL(518, "广告内容不为空"),
+    ADVERTISEMENT_NOT_FOUND(519, "未查询到广告"),
+    ADVERTISEMENT_IDS_NOT_NULL(520, "要删除的广告ID集合为空"),
+    EVENT_NOT_NULL(521, "广告内容不为空"),
+    EVENT_NOT_FOUND(522, "未查询到广告"),
+    EVENT_IDS_NOT_NULL(523, "要删除的广告ID集合为空"),
+    KNOWLEDGE_NOT_NULL(524, "知识内容不为空"),
+    KNOWLEDGE_NOT_FOUND(525, "未查询到知识"),
+    KNOWLEDGE_IDS_NOT_NULL(526, "要删除的知识ID集合为空"),
+    ARTICLE_NOT_NULL(527, "文章内容不为空"),
+    ARTICLE_NOT_FOUND(528, "未查询到文章"),
+    ARTICLE_IDS_NOT_NULL(529, "要删除的文章ID集合为空"),
+    LINK_NOT_NULL(530, "友情链接网站地址不为空"),
+    LINK_NOT_FOUND(531, "未查询到友情链接"),
+    LINK_IDS_NOT_NULL(532, "要删除的友情链接ID集合为空"),
+    CATEGORY_NOT_NULL(530, "车辆分类名不为空"),
+    CATEGORY_NOT_FOUND(531, "未查询到车辆分类"),
+    CATEGORY_IDS_NOT_NULL(532, "要删除的车辆分类ID集合为空"),
+    COMMENT_IDS_NOT_NULL(533, "要删除的评论ID集合为空"),
+    SAVE_EXIST(534, "收藏不存在");
     int code;
     String msg;
 

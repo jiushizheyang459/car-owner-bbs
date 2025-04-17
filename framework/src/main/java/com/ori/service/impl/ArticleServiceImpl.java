@@ -5,32 +5,39 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ori.constants.MqConstants;
 import com.ori.constants.SystemConstants;
+import com.ori.domain.dto.AddArticleDto;
+import com.ori.domain.dto.UpdateArticleDto;
 import com.ori.domain.dto.ViewCountMessageDto;
-import com.ori.domain.entity.Article;
-import com.ori.domain.entity.Category;
-import com.ori.domain.entity.User;
-import com.ori.domain.vo.ArticleDetailVo;
-import com.ori.domain.vo.ArticleListVo;
-import com.ori.domain.vo.HotArticleVo;
-import com.ori.domain.vo.PageVo;
+import com.ori.domain.entity.*;
+import com.ori.domain.vo.*;
+import com.ori.enums.AppHttpCodeEnum;
+import com.ori.exception.SystemException;
 import com.ori.mapper.ArticleMapper;
 import com.ori.mapper.UserMapper;
 import com.ori.service.ArticleService;
 import com.ori.service.CategoryService;
+import com.ori.service.CommentService;
+import com.ori.service.FollowsService;
 import com.ori.utils.BeanCopyUtils;
 import com.ori.utils.RedisCache;
+import com.ori.utils.SecurityUtils;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.amqp.core.MessageDeliveryMode;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> implements ArticleService {
 
     @Autowired
@@ -41,6 +48,10 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
     private RedisCache redisCache;
     @Autowired
     private RabbitTemplate rabbitTemplate;
+    @Autowired
+    private FollowsService followsService;
+    @Autowired
+    private CommentService commentService;
 
     /**
      * 查询热门文章
@@ -51,24 +62,98 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
     public List<HotArticleVo> hotArticleList() {
         LambdaQueryWrapper<Article> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Article::getStatus, SystemConstants.ARTICLE_STATUS_NORMAL);
+        queryWrapper.eq(Article::getDelFlag, 0);
         queryWrapper.orderByDesc(Article::getViewCount);
 
-        Page<Article> page = new Page<>(1, 10);
+        Page<Article> page = new Page<>(1, 4);
         page(page, queryWrapper);
 
         List<Article> articles = page.getRecords();
 
-        List<HotArticleVo> vos = BeanCopyUtils.copyBeanList(articles, HotArticleVo.class);
+        List<Long> authorIds = articles.stream()
+                .map(Article::getCreateById)
+                .collect(Collectors.toList());
+
+        List<User> users = userMapper.selectBatchIds(authorIds);
+
+        Map<Long, User> userMap = users.stream()
+                .collect(Collectors.toMap(User::getId, user -> user));
+
+        // region 获取文章列表并转换为 ArticleListVo 列表
+        List<HotArticleVo> vos = articles.stream()
+                .map(article -> {
+                    User user = userMap.getOrDefault(article.getCreateById(), new User());
+
+                    return new HotArticleVo(
+                            article.getId(),
+                            user.getNickName(),
+                            user.getAvatar(),
+                            article.getTitle(),
+                            article.getContent(),
+                            article.getThumbnail(),
+                            article.getViewCount()
+                    );
+                })
+                .collect(Collectors.toList());
+        // endregion
 
         return vos;
     }
 
     /**
-     * 分页查询文章
+     * 查询最新文章
+     *
+     * @return 8篇最新文章
+     */
+    @Override
+    public List<NewArticleVo> newArticleList() {
+        LambdaQueryWrapper<Article> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Article::getStatus, SystemConstants.ARTICLE_STATUS_NORMAL);
+        queryWrapper.eq(Article::getDelFlag, 0);
+        queryWrapper.orderByDesc(Article::getCreateTime);
+
+        Page<Article> page = new Page<>(1, 8);
+        page(page, queryWrapper);
+
+        List<Article> articles = page.getRecords();
+
+        List<Long> authorIds = articles.stream()
+                .map(Article::getCreateById)
+                .collect(Collectors.toList());
+
+        List<User> users = userMapper.selectBatchIds(authorIds);
+
+        Map<Long, User> userMap = users.stream()
+                .collect(Collectors.toMap(User::getId, user -> user));
+
+        // region 获取文章列表并转换为 ArticleListVo 列表
+        List<NewArticleVo> vos = articles.stream()
+                .map(article -> {
+                    User user = userMap.getOrDefault(article.getCreateById(), new User());
+
+                    return new NewArticleVo(
+                            article.getId(),
+                            user.getNickName(),
+                            user.getAvatar(),
+                            article.getTitle(),
+                            article.getContent(),
+                            article.getThumbnail(),
+                            article.getViewCount(),
+                            10L
+                    );
+                })
+                .collect(Collectors.toList());
+        // endregion
+
+        return vos;
+    }
+
+    /**
+     * 分页全部查询文章
      *
      * @param pageNum
      * @param pageSize
-     * @return 分页查询文章结果
+     * @return 全部文章结果
      */
     @Override
     public PageVo articleList(Integer pageNum, Integer pageSize) {
@@ -102,6 +187,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         List<ArticleListVo> articleListVos = page.getRecords().stream()
                 .map(article -> {
                     User user = userMap.getOrDefault(article.getCreateById(), new User());
+                    Integer commentCount = commentService.commentCount(article.getId());
 
                     return new ArticleListVo(
                             article.getId(),
@@ -111,7 +197,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
                             article.getContent(),
                             Boolean.FALSE,
                             10L,
-                            10L,
+                            commentCount,
                             article.getViewCount(),
                             Boolean.FALSE
                     );
@@ -120,6 +206,80 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         // endregion
 
         return new PageVo(articleListVos, page.getTotal());
+    }
+
+    /**
+     * 分页查询当前用户关注的用户发表的文章
+     *
+     * @param pageNum 多少页
+     * @param pageSize 每页多少条
+     * @return 当前用户关注的用户发表的文章
+     */
+    @Override
+    public PageVo FollowArticleList(Integer pageNum, Integer pageSize) {
+
+        Long userId = SecurityUtils.getUserId();
+
+        // 获取当前用户关注的所有用户 ID
+        List<Long> followedIds = followsService.lambdaQuery()
+                .eq(Follows::getFollowerId, userId)
+                .list()
+                .stream()
+                .map(Follows::getFollowedId)
+                .collect(Collectors.toList());
+
+        if (followedIds.isEmpty()) {
+            return new PageVo(Collections.emptyList(), 0L);
+        }
+
+        // 分页查询关注的用户的文章
+        Page<Article> page = new Page<>(pageNum, pageSize);
+        LambdaQueryWrapper<Article> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Article::getStatus, SystemConstants.ARTICLE_STATUS_NORMAL)
+                .in(Article::getCreateById, followedIds)
+                .orderByDesc(Article::getIsTop)
+                .orderByDesc(Article::getCreateTime);
+
+        page(page, wrapper); // 调用分页
+
+        List<Article> records = page.getRecords();
+
+        if (records.isEmpty()) {
+            return new PageVo(Collections.emptyList(), 0L);
+        }
+
+        // 批量查用户信息（避免 N 次 userMapper.selectById）
+        Set<Long> userIds = records.stream()
+                .map(Article::getCreateById)
+                .collect(Collectors.toSet());
+
+        List<User> users = userMapper.selectBatchIds(userIds);
+
+        Map<Long, User> userMap = users.stream()
+                .collect(Collectors.toMap(User::getId, Function.identity()));
+
+        // 封装 VO
+        List<ArticleListVo> vos = records.stream().map(article -> {
+            ArticleListVo vo = new ArticleListVo();
+            vo.setId(article.getId());
+            vo.setTitle(article.getTitle());
+            vo.setContent(article.getContent());
+            vo.setViewCount(article.getViewCount());
+            vo.setFavourCount(10L); // TODO: 替换为真实点赞数量
+            vo.setCommentCount(commentService.commentCount(article.getId()));
+            vo.setFavourFlag(false);
+            vo.setSaveFlag(false);
+
+            User author = userMap.get(article.getCreateById());
+            if (author != null) {
+                vo.setNickName(author.getNickName());
+                vo.setAvatar(author.getAvatar());
+            }
+
+            return vo;
+        }).collect(Collectors.toList());
+
+        return new PageVo(vos, page.getTotal());
     }
 
     /**
@@ -134,16 +294,21 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         if (article == null) {
             return null;
         }
+
         Integer viewCount = redisCache.getCacheObject(SystemConstants.VIEW_COUNT_KEY + id);
         if (viewCount == null) {
             viewCount = article.getViewCount().intValue();
             redisCache.setCacheObject(SystemConstants.VIEW_COUNT_KEY + id, viewCount);
         }
         article.setViewCount(viewCount.longValue());
+
+        return buildArticleDetailVo(article);
+    }
+
+    private ArticleDetailVo buildArticleDetailVo(Article article) {
         ArticleDetailVo vo = BeanCopyUtils.copyBean(article, ArticleDetailVo.class);
 
         Category category = categoryService.getById(article.getCategoryId());
-
         String categoryName = Optional.ofNullable(category).orElseGet(Category::new).getName();
         vo.setCategoryName(categoryName);
 
@@ -217,5 +382,62 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
                 redisCache.expire(countKey, SystemConstants.NORMAL_ARTICLES_EXPIRE_HOURS, TimeUnit.HOURS);
             }
         }
+    }
+
+    @Override
+    public void addArticle(AddArticleDto addArticleDto) {
+        Article article = BeanCopyUtils.copyBean(addArticleDto, Article.class);
+
+        if (!StringUtils.hasText(article.getContent())) {
+            throw new SystemException(AppHttpCodeEnum.ARTICLE_NOT_NULL);
+        }
+        save(article);
+    }
+
+    @Override
+    public void updateArticle(UpdateArticleDto updateArticleDto) {
+        Article article = getById(updateArticleDto.getId());
+        if (Objects.isNull(article)) {
+            throw new SystemException(AppHttpCodeEnum.ARTICLE_NOT_FOUND);
+        }
+        article = BeanCopyUtils.copyBean(updateArticleDto, Article.class);
+        updateById(article);
+    }
+
+    @Override
+    public void deleteArticle(List<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            throw new SystemException(AppHttpCodeEnum.ARTICLE_IDS_NOT_NULL);
+        }
+        lambdaUpdate()
+                .set(Article::getDelFlag, 1)
+                .in(Article::getId, ids);
+    }
+
+    @Override
+    public Map<Long, ArticleDetailVo> getArticleDetailMap(List<Long> articleIds) {
+        // 如果articleIds，返回空Map
+        if (CollectionUtils.isEmpty(articleIds)) {
+            return Collections.emptyMap();
+        }
+
+        Map<Long, CompletableFuture<ArticleDetailVo>> futureMap = new HashMap<>();
+        for (Long articleId : articleIds) {
+            futureMap.put(articleId, CompletableFuture.supplyAsync(() -> articleDetail(articleId)));
+        }
+
+        Map<Long, ArticleDetailVo> result = new HashMap<>();
+        for (Map.Entry<Long, CompletableFuture<ArticleDetailVo>> entry : futureMap.entrySet()) {
+            try {
+                ArticleDetailVo vo = entry.getValue().get();
+                if (vo != null) {
+                    result.put(entry.getKey(), vo);
+                }
+            } catch (Exception e) {
+                log.error("获取文章详情失败，文章ID: {}", entry.getKey(), e);
+            }
+        }
+
+        return result;
     }
 }
