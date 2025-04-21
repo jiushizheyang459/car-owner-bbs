@@ -35,4 +35,19 @@ public class AddEventDto {
      * 活动结束时间
      */
     private LocalDateTime endTime;
+
+    /**
+     * 活动时间
+     */
+    private LocalDateTime eventTime;
+
+    /**
+     * 活动类型
+     */
+    private String type;
+
+    /**
+     * 举办地区
+     */
+    private String venue;
 }

@@ -5,9 +5,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
-public class LinkVo {
+@NoArgsConstructor
+public class HotEventListVo {
 
     /**
      * ID
@@ -15,27 +15,28 @@ public class LinkVo {
     private Long id;
 
     /**
-     * 友链名称
+     * 作者
      */
-    private String name;
+    private String createBy;
 
     /**
-     * logo
+     * 头像地址
      */
-    private String logo;
+    private String avatar;
 
     /**
-     * 网站地址
+     * 标题
      */
-    private String url;
+    private String title;
 
     /**
-     * 网站介绍
+     * 活动内容
      */
-    private String description;
+    private String content;
 
     /**
-     * 状态
+     * 缩略图
      */
-    private String status;
+    private String thumbnail;
+
 }

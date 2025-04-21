@@ -6,6 +6,7 @@ import com.ori.domain.dto.AddInformationDto;
 import com.ori.domain.dto.UpdateInformationDto;
 import com.ori.domain.vo.InformationDetailVo;
 import com.ori.domain.vo.informationListVo;
+import com.ori.domain.vo.newInformationListVo;
 import com.ori.service.InformationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -35,6 +36,17 @@ public class InformationController {
     @GetMapping
     public ResponseResult informationList() {
         List<informationListVo> vos = informationService.informationList();
+        return ResponseResult.okResult(vos);
+    }
+
+    /**
+     * 查询最新资讯
+     *
+     * @return 最新的4篇资讯
+     */
+    @GetMapping("/newInformationList")
+    public ResponseResult newInformationList() {
+        List<newInformationListVo> vos = informationService.newinformationList();
         return ResponseResult.okResult(vos);
     }
 

@@ -42,7 +42,10 @@ public enum AppHttpCodeEnum { // 成功
     CATEGORY_NOT_FOUND(531, "未查询到车辆分类"),
     CATEGORY_IDS_NOT_NULL(532, "要删除的车辆分类ID集合为空"),
     COMMENT_IDS_NOT_NULL(533, "要删除的评论ID集合为空"),
-    SAVE_EXIST(534, "收藏不存在");
+    SAVE_EXIST(534, "收藏不存在"),
+    ANNOUNCEMENT_NOT_NULL(535, "公告标题不为空"),
+    ANNOUNCEMENT_NOT_FOUND(536, "未查询到公告"),
+    ANNOUNCEMENT_IDS_NOT_NULL(537, "要删除的公告ID集合为空");
     int code;
     String msg;
 

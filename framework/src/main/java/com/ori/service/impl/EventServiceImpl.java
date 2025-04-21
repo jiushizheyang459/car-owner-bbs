@@ -17,11 +17,13 @@ import com.ori.mapper.EventMapper;
 import com.ori.mapper.UserMapper;
 import com.ori.service.EventService;
 import com.ori.utils.BeanCopyUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -44,9 +46,7 @@ public class EventServiceImpl extends ServiceImpl<EventMapper, Event> implements
         LocalDateTime now = LocalDateTime.now();
         // 创建 LambdaQueryWrapper 并设置查询条件
         LambdaQueryWrapper<Event> wrapper = new LambdaQueryWrapper<>();
-        wrapper.gt(Event::getEndTime, now)       // 结束时间大于现在
-                .lt(Event::getStartTime, now)     // 开始时间小于现在
-                .orderByDesc(Event::getCreateTime);
+        wrapper.orderByDesc(Event::getCreateTime);
 
         // 分页查询
         Page<Event> page = new Page<>(pageNum, pageSize);
@@ -88,6 +88,81 @@ public class EventServiceImpl extends ServiceImpl<EventMapper, Event> implements
         // endregion
 
         return new PageVo(eventListVos, page.getTotal());
+    }
+
+    @Override
+    public List<HotEventListVo> hotEventList() {
+        List<Event> events = lambdaQuery()
+                .orderByDesc(Event::getCreateTime)
+                .last("LIMIT 4")
+                .list();
+
+        if (CollectionUtils.isEmpty(events)) {
+            return Collections.emptyList();
+        }
+
+        List<Long> authorIds = events.stream()
+                .map(Event::getCreateById)
+                .collect(Collectors.toList());
+
+        List<User> users = userMapper.selectBatchIds(authorIds);
+
+        Map<Long, User> userMap = users.stream()
+                .collect(Collectors.toMap(User::getId, user -> user));
+
+        List<HotEventListVo> vos = events.stream()
+                .map(event -> {
+                    User user = userMap.getOrDefault(event.getCreateById(), new User());
+
+                    return new HotEventListVo(
+                            event.getId(),
+                            event.getCreateBy(),
+                            user.getAvatar(),
+                            event.getTitle(),
+                            event.getContent(),
+                            event.getThumbnail()
+                    );
+                })
+                .collect(Collectors.toList());
+
+        return vos;
+    }
+
+    @Override
+    public List<NewEventListVo> newEventList() {
+        List<Event> events = lambdaQuery()
+                .orderByDesc(Event::getCreateTime)
+                .last("LIMIT 8")
+                .list();
+
+        if (CollectionUtils.isEmpty(events)) {
+            return Collections.emptyList();
+        }
+
+        List<Long> authorIds = events.stream()
+                .map(Event::getCreateById)
+                .collect(Collectors.toList());
+
+        List<User> users = userMapper.selectBatchIds(authorIds);
+
+        Map<Long, User> userMap = users.stream()
+                .collect(Collectors.toMap(User::getId, user -> user));
+
+        List<NewEventListVo> vos = events.stream()
+                .map(event -> {
+                    User user = userMap.getOrDefault(event.getCreateById(), new User());
+
+                    return new NewEventListVo(
+                            event.getId(),
+                            event.getCreateBy(),
+                            user.getAvatar(),
+                            event.getTitle(),
+                            event.getVenue()
+                    );
+                })
+                .collect(Collectors.toList());
+
+        return vos;
     }
 
     @Override

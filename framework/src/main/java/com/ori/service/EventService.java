@@ -5,6 +5,8 @@ import com.ori.domain.dto.AddEventDto;
 import com.ori.domain.dto.UpdateEventDto;
 import com.ori.domain.entity.Event;
 import com.ori.domain.vo.EventDetailVo;
+import com.ori.domain.vo.HotEventListVo;
+import com.ori.domain.vo.NewEventListVo;
 import com.ori.domain.vo.PageVo;
 
 import java.util.List;
@@ -26,6 +28,20 @@ public interface EventService extends IService<Event> {
      * @return 全部活动结果
      */
     PageVo eventList(Integer pageNum, Integer pageSize);
+
+    /**
+     * 分页查询精选活动
+     *
+     * @return 精选活动
+     */
+    List<HotEventListVo> hotEventList();
+
+    /**
+     * 分页查询最新活动
+     *
+     * @return 最新活动
+     */
+    List<NewEventListVo> newEventList();
 
 
     /**

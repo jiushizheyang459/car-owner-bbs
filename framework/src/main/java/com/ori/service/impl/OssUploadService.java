@@ -29,6 +29,7 @@ public class OssUploadService implements UploadService {
 
         //对原始文件名进行判断
         if (!(originalFilename.endsWith(".jpg")
+                || originalFilename.endsWith(".JPG")
                 || originalFilename.endsWith(".jpeg")
                 || originalFilename.endsWith(".png")
                 || originalFilename.endsWith(".ico"))) {
@@ -50,7 +51,8 @@ public class OssUploadService implements UploadService {
 
     private String uploadOss(MultipartFile imgFile, String filePath) {
         //构造一个带指定 Region 对象的配置类
-        Configuration cfg = new Configuration(Region.autoRegion());
+//        Configuration cfg = new Configuration(Region.autoRegion());
+        Configuration cfg = new Configuration(Region.regionAs0());
         cfg.resumableUploadAPIVersion = Configuration.ResumableUploadAPIVersion.V2;// 指定分片上传版本
         //...其他参数参考类注释
         UploadManager uploadManager = new UploadManager(cfg);
@@ -68,7 +70,7 @@ public class OssUploadService implements UploadService {
                 DefaultPutRet putRet = new Gson().fromJson(response.bodyString(), DefaultPutRet.class);
                 System.out.println(putRet.key);
                 System.out.println(putRet.hash);
-                return "http://srm8cuw52.hd-bkt.clouddn.com/" + putRet.key;
+                return "http://suya04o6t.sabkt.gdipper.com/" + putRet.key;
             } catch (QiniuException ex) {
                 ex.printStackTrace();
                 if (ex.response != null) {

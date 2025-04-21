@@ -6,6 +6,7 @@ import com.ori.domain.dto.UpdateInformationDto;
 import com.ori.domain.entity.Information;
 import com.ori.domain.vo.InformationDetailVo;
 import com.ori.domain.vo.informationListVo;
+import com.ori.domain.vo.newInformationListVo;
 
 import java.util.List;
 
@@ -24,6 +25,13 @@ public interface InformationService extends IService<Information> {
      * @return 所有资讯
      */
     List<informationListVo> informationList();
+
+    /**
+     * 查询最新资讯
+     *
+     * @return 最新的4篇资讯
+     */
+    List<newInformationListVo> newinformationList();
 
     /**
      * 根据资讯ID查询资讯详情

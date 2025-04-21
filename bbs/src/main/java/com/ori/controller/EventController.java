@@ -4,8 +4,7 @@ package com.ori.controller;
 import com.ori.domain.ResponseResult;
 import com.ori.domain.dto.AddEventDto;
 import com.ori.domain.dto.UpdateEventDto;
-import com.ori.domain.vo.EventDetailVo;
-import com.ori.domain.vo.PageVo;
+import com.ori.domain.vo.*;
 import com.ori.service.EventService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -37,6 +36,28 @@ public class EventController {
     @GetMapping("/eventList")
     public ResponseResult eventList(Integer pageNum, Integer size) {
         PageVo vo = eventService.eventList(pageNum, size);
+        return ResponseResult.okResult(vo);
+    }
+
+    /**
+     * 查询精选活动
+     *
+     * @return 4篇精选活动
+     */
+    @GetMapping("/hotEventList")
+    public ResponseResult hotEventList() {
+        List<HotEventListVo> vo = eventService.hotEventList();
+        return ResponseResult.okResult(vo);
+    }
+
+    /**
+     * 查询最新活动
+     *
+     * @return 8篇最新活动
+     */
+    @GetMapping("/newEventList")
+    public ResponseResult newEventList() {
+        List<NewEventListVo> vo = eventService.newEventList();
         return ResponseResult.okResult(vo);
     }
 

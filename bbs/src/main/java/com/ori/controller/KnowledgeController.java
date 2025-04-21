@@ -19,7 +19,7 @@ import java.util.List;
  * @since 2025-04-16 22:50:02
  */
 @RestController
-@RequestMapping("knowledge")
+@RequestMapping("/knowledge")
 public class KnowledgeController {
     /**
      * 服务对象
@@ -34,7 +34,7 @@ public class KnowledgeController {
      * @param size 每页多少条
      * @return 全部知识结果
      */
-    @GetMapping("/articleList")
+    @GetMapping("/knowledgeList")
     public ResponseResult knowledgeList(Integer pageNum, Integer size) {
         PageVo vo = knowledgeService.knowledgeList(pageNum, size);
         return ResponseResult.okResult(vo);

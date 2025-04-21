@@ -8,6 +8,7 @@ import com.ori.domain.entity.Information;
 import com.ori.domain.entity.User;
 import com.ori.domain.vo.InformationDetailVo;
 import com.ori.domain.vo.informationListVo;
+import com.ori.domain.vo.newInformationListVo;
 import com.ori.enums.AppHttpCodeEnum;
 import com.ori.exception.SystemException;
 import com.ori.mapper.InformationMapper;
@@ -42,6 +43,7 @@ public class InformationServiceImpl extends ServiceImpl<InformationMapper, Infor
     public List<informationListVo> informationList() {
         List<Information> informations = lambdaQuery()
                 .eq(Information::getStatus, SystemConstants.INFORMATION_STATUS_NORMAL)
+                .orderByDesc(Information::getCreateTime)
                 .list();
 
         if (CollectionUtils.isEmpty(informations)) {
@@ -75,6 +77,27 @@ public class InformationServiceImpl extends ServiceImpl<InformationMapper, Infor
                             createTime
                     );
                 })
+                .collect(Collectors.toList());
+
+        return vos;
+    }
+
+    @Override
+    public List<newInformationListVo> newinformationList() {
+        List<Information> informations = lambdaQuery()
+                .eq(Information::getStatus, SystemConstants.INFORMATION_STATUS_NORMAL)
+                .orderByDesc(Information::getCreateTime)
+                .last("LIMIT 4")
+                .list();
+
+        if (CollectionUtils.isEmpty(informations)) {
+            return Collections.emptyList();
+        }
+        List<newInformationListVo> vos = informations.stream()
+                .map(information -> new newInformationListVo(
+                        information.getTitle(),
+                        information.getContent()
+                ))
                 .collect(Collectors.toList());
 
         return vos;
