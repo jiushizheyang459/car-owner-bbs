@@ -81,10 +81,7 @@ public class SaveServiceImpl extends ServiceImpl<SaveMapper, Save> implements Sa
     public void addSave(Long articleId) {
         Long userId = SecurityUtils.getUserId();
 
-        Save existingSave = lambdaQuery()
-                .eq(Save::getUserId, userId)
-                .eq(Save::getArticleId, articleId)
-                .one();
+        Save existingSave = getBaseMapper().selectExisting(userId, articleId);
 
         if (existingSave != null) {
             if (existingSave.getDelFlag() == 0) {
@@ -93,11 +90,7 @@ public class SaveServiceImpl extends ServiceImpl<SaveMapper, Save> implements Sa
                 return;
             } else {
                 // 曾收藏过，恢复收藏
-                lambdaUpdate()
-                        .set(Save::getDelFlag, 0)
-                        .set(Save::getUpdateTime, LocalDateTime.now())
-                        .eq(Save::getId, existingSave.getId())
-                        .update();
+                getBaseMapper().reSave(existingSave.getId());
                 return;
             }
         }
@@ -125,5 +118,17 @@ public class SaveServiceImpl extends ServiceImpl<SaveMapper, Save> implements Sa
         if (!updated) {
             throw new SystemException(AppHttpCodeEnum.SAVE_EXIST);
         }
+    }
+
+    @Override
+    public boolean isArticleSaved(Long articleId) {
+        Long userId = SecurityUtils.getUserId();
+        
+        // 查询用户是否已收藏该文章（未删除的记录）
+        return lambdaQuery()
+                .eq(Save::getUserId, userId)
+                .eq(Save::getArticleId, articleId)
+                .eq(Save::getDelFlag, 0)
+                .count() > 0;
     }
 }

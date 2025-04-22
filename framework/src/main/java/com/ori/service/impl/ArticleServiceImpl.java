@@ -19,6 +19,7 @@ import com.ori.service.CategoryService;
 import com.ori.service.CommentService;
 import com.ori.service.FollowsService;
 import com.ori.service.LikeService;
+import com.ori.service.SaveService;
 import com.ori.utils.BeanCopyUtils;
 import com.ori.utils.RedisCache;
 import com.ori.utils.SecurityUtils;
@@ -55,6 +56,8 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
     private CommentService commentService;
     @Autowired
     private LikeService likeService;
+    @Autowired
+    private SaveService saveService;
 
     /**
      * 查询热门文章
@@ -206,6 +209,14 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
                         log.debug("用户未登录，无法获取点赞状态");
                     }
 
+                    // 获取当前用户是否收藏
+                    Boolean isSaved = Boolean.FALSE;
+                    try {
+                        isSaved = saveService.isArticleSaved(article.getId());
+                    } catch (Exception e) {
+                        log.debug("用户未登录，无法获取收藏状态");
+                    }
+
                     return new ArticleListVo(
                             article.getId(),
                             user.getNickName(),
@@ -216,7 +227,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
                             likeCount,
                             commentCount,
                             article.getViewCount(),
-                            Boolean.FALSE
+                            isSaved
                     );
                 })
                 .collect(Collectors.toList());
@@ -290,7 +301,9 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
             vo.setLikeFlag(likeService.isLiked(article.getId(), userId));
             
             vo.setCommentCount(commentService.commentCount(article.getId()));
-            vo.setSaveFlag(false);
+            
+            // 获取当前用户是否收藏
+            vo.setSaveFlag(saveService.isArticleSaved(article.getId()));
 
             User author = userMap.get(article.getCreateById());
             if (author != null) {

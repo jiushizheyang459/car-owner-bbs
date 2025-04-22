@@ -58,5 +58,17 @@ public class SaveController {
         saveService.deleteSave(articleId);
         return ResponseResult.okResult();
     }
+
+    /**
+     * 检查当前用户是否已收藏指定文章
+     *
+     * @param articleId 文章ID
+     * @return 是否已收藏
+     */
+    @GetMapping("/status/{articleId}")
+    public ResponseResult isArticleSaved(@PathVariable("articleId") Long articleId) {
+        boolean isSaved = saveService.isArticleSaved(articleId);
+        return ResponseResult.okResult(isSaved);
+    }
 }
 

@@ -35,4 +35,12 @@ public interface SaveService extends IService<Save> {
      * @param articleId 要取消收藏的文章ID
      */
     void deleteSave(Long articleId);
+
+    /**
+     * 检查当前用户是否已收藏指定文章
+     *
+     * @param articleId 文章ID
+     * @return 是否已收藏
+     */
+    boolean isArticleSaved(Long articleId);
 }
