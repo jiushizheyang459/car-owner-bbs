@@ -59,5 +59,13 @@ public class CommentVo {
      */
     private String createBy;
 
+    /**
+     * 评论人头像地址
+     */
+    private String avatar;
+
+    /**
+     * 子评论
+     */
     private List<CommentVo> children;
 }

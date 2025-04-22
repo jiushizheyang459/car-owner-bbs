@@ -55,94 +55,115 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
 
         Page<Comment> page = new Page<>(pageNum, size);
         page(page, wrapper);
-        List<Comment> comments = page.getRecords();
+        List<Comment> rootComments = page.getRecords();
 
         // 如果没查询到根评论，说明没有评论，直接返回
-        if (comments.isEmpty()) {
+        if (rootComments.isEmpty()) {
             return new PageVo(Collections.emptyList(), 0L);
         }
         //endregion
 
         //region 获取根评论的 id 列表
-        List<Long> rootCommentIds = comments.stream().map(Comment::getId).collect(Collectors.toList());
+        List<Long> rootCommentIds = rootComments.stream().map(Comment::getId).collect(Collectors.toList());
         //endregion
 
-        //region 查询所有子评论
-        LambdaQueryWrapper<Comment> childWrapper = new LambdaQueryWrapper<>();
-        childWrapper.in(Comment::getRootId, rootCommentIds);
-        childWrapper.orderByAsc(Comment::getCreateTime);
-        List<Comment> childComments = getBaseMapper().selectList(childWrapper);
+        //region 查询所有子评论（包括多层嵌套）
+        LambdaQueryWrapper<Comment> allCommentsWrapper = new LambdaQueryWrapper<>();
+        allCommentsWrapper.eq(SystemConstants.ARTICLE_COMMENT.equals(commentType), Comment::getArticleId, articleId);
+        allCommentsWrapper.eq(Comment::getType, commentType);
+        allCommentsWrapper.eq(Comment::getDelFlag, 0);
+        allCommentsWrapper.orderByAsc(Comment::getCreateTime);
+        List<Comment> allComments = getBaseMapper().selectList(allCommentsWrapper);
         //endregion
 
         //region 批量查询用户信息
-        // 合并流 统一处理toCommentUserId
-        List<Long> toCommentUserIds = Stream.concat(comments.stream(), childComments.stream())
+        List<Long> toCommentUserIds = allComments.stream()
                 .map(Comment::getToCommentUserId)
                 .filter(id -> id != -1L)
                 .distinct()
                 .collect(Collectors.toList());
 
+        // 查询评论人ID列表
+        List<Long> createByIds = allComments.stream()
+                .map(Comment::getCreateById)
+                .distinct()
+                .collect(Collectors.toList());
+
+        // 合并所有需要查询的用户ID
+        List<Long> allUserIds = Stream.concat(toCommentUserIds.stream(), createByIds.stream())
+                .distinct()
+                .collect(Collectors.toList());
+
         Map<Long, User> userMap;
-        //toCommentUserId不为空才查询
-        if (!toCommentUserIds.isEmpty()) {
-            List<User> users = userMapper.selectBatchIds(toCommentUserIds);
+        // 用户ID不为空才查询
+        if (!allUserIds.isEmpty()) {
+            List<User> users = userMapper.selectBatchIds(allUserIds);
             userMap = users.stream().collect(Collectors.toMap(User::getId, user -> user));
         } else {
             userMap = Collections.emptyMap();
         }
         //endregion
 
-        //region 组装子评论 Map，按 root_id 分组
-        Map<Long, List<Comment>> childCommentMap = childComments.stream()
-                .collect(Collectors.groupingBy(Comment::getRootId));
+        //region 构建评论树
+        // 将所有评论转换为CommentVo对象
+        Map<Long, CommentVo> commentVoMap = new HashMap<>();
+        for (Comment comment : allComments) {
+            // 获取被回复用户信息
+            User toCommentUser = userMap.getOrDefault(comment.getToCommentUserId(), new User());
+            // 获取评论人信息
+            User createUser = userMap.getOrDefault(comment.getCreateById(), new User());
+            
+            CommentVo commentVo = new CommentVo();
+            commentVo.setId(comment.getId());
+            commentVo.setArticleId(comment.getArticleId());
+            commentVo.setRootId(comment.getRootId());
+            commentVo.setContent(comment.getContent());
+            commentVo.setToCommentUserId(comment.getToCommentUserId());
+            commentVo.setToCommentUserName(toCommentUser.getNickName() == null ? "" : toCommentUser.getNickName());
+            commentVo.setToCommentId(comment.getToCommentId());
+            commentVo.setCreateById(comment.getCreateById());
+            commentVo.setCreateTime(comment.getCreateTime());
+            commentVo.setCreateBy(comment.getCreateBy());
+            commentVo.setAvatar(createUser.getAvatar() == null ? "" : createUser.getAvatar());
+            commentVo.setChildren(new ArrayList<>());
+            
+            commentVoMap.put(comment.getId(), commentVo);
+        }
+
+        // 构建评论树
+        List<CommentVo> rootCommentVos = new ArrayList<>();
+        for (Comment rootComment : rootComments) {
+            CommentVo rootCommentVo = commentVoMap.get(rootComment.getId());
+            if (rootCommentVo != null) {
+                buildCommentTree(rootCommentVo, commentVoMap);
+                rootCommentVos.add(rootCommentVo);
+            }
+        }
         //endregion
 
-        //region 转换为 VO 对象
-        List<CommentVo> commentVos = comments.stream()
-                .map(comment -> {
-                    User user = userMap.getOrDefault(comment.getToCommentUserId(), new User());
-                    CommentVo commentVo = new CommentVo(
-                            comment.getId(),
-                            comment.getArticleId(),
-                            comment.getRootId(),
-                            comment.getContent(),
-                            comment.getToCommentUserId(),
-                            user.getNickName() == null ? "" : user.getNickName(),
-                            comment.getToCommentId(),
-                            comment.getCreateById(),
-                            comment.getCreateTime(),
-                            comment.getCreateBy(),
-                            new ArrayList<>()
-                    );
+        return new PageVo(rootCommentVos, page.getTotal());
+    }
 
-                    // 绑定子评论
-                    List<CommentVo> children = childCommentMap.getOrDefault(comment.getId(), Collections.emptyList())
-                            .stream()
-                            .map(child -> {
-                                User childUser = userMap.getOrDefault(child.getToCommentUserId(), new User());
-                                return new CommentVo(
-                                        child.getId(),
-                                        child.getArticleId(),
-                                        child.getRootId(),
-                                        child.getContent(),
-                                        child.getToCommentUserId(),
-                                        childUser.getNickName() == null ? "" : childUser.getNickName(),
-                                        child.getToCommentId(),
-                                        child.getCreateById(),
-                                        child.getCreateTime(),
-                                        child.getCreateBy(),
-                                        new ArrayList<>()
-                                );
-                            })
-                            .collect(Collectors.toList());
-
-                    commentVo.setChildren(children);
-                    return commentVo;
-                })
+    /**
+     * 递归构建评论树
+     *
+     * @param parentCommentVo 父评论
+     * @param commentVoMap 所有评论的Map
+     */
+    private void buildCommentTree(CommentVo parentCommentVo, Map<Long, CommentVo> commentVoMap) {
+        // 查找所有回复当前评论的评论
+        List<CommentVo> children = commentVoMap.values().stream()
+                .filter(commentVo -> commentVo.getToCommentId() != null && 
+                        commentVo.getToCommentId().equals(parentCommentVo.getId()))
                 .collect(Collectors.toList());
-        //endregion
 
-        return new PageVo(commentVos, page.getTotal());
+        // 递归处理每个子评论
+        for (CommentVo child : children) {
+            buildCommentTree(child, commentVoMap);
+        }
+
+        // 设置子评论
+        parentCommentVo.setChildren(children);
     }
 
     @Override
