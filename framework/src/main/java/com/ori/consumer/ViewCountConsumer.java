@@ -42,7 +42,7 @@ public class ViewCountConsumer {
                 messageBuffer.add(message);
 
                 // 达到批处理阈值时，批量更新数据库
-                if (messageBuffer.size() >= SystemConstants.BATCH_SIZE)  {
+                if (messageBuffer.size() >= SystemConstants.VIEW_COUNT_BATCH_SIZE)  {
                     processBatch();
                 }
             }

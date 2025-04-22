@@ -37,12 +37,12 @@ public class ArticleListVo {
     /**
      * 是否点赞
      */
-    private Boolean favourFlag;
+    private Boolean likeFlag;
 
     /**
      * 点赞数量
      */
-    private Long favourCount;
+    private Long likeCount;
 
     /**
      * 评论数量

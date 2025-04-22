@@ -1,7 +1,6 @@
-package com.ori.temp.entity;
+package com.ori.domain.entity;
 
 import java.time.LocalDateTime;
-import java.io.Serializable;
 
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;

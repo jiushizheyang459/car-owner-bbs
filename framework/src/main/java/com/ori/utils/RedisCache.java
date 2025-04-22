@@ -5,6 +5,7 @@ import org.springframework.data.redis.core.BoundSetOperations;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -192,6 +193,29 @@ public class RedisCache
     {
         return redisTemplate.opsForSet().members(key);
     }
+
+    /**
+     * 判断Set中是否包含某个值
+     *
+     * @param key Redis键
+     * @param value 要判断的值
+     * @return true表示包含，false表示不包含
+     */
+    public <T> Boolean isSetMember(final String key, final T value) {
+        return redisTemplate.opsForSet().isMember(key, value);
+    }
+
+    /**
+     * 从 Set 集合中移除一个值
+     *
+     * @param key Redis 键
+     * @param value 要移除的值
+     * @return 被成功移除的数量（0表示未移除，1表示移除了）
+     */
+    public <T> Long removeCacheSetValue(final String key, final T value) {
+        return redisTemplate.opsForSet().remove(key, value);
+    }
+
     //endregion
 
     //region Hash(Map)
@@ -279,4 +303,16 @@ public class RedisCache
         return redisTemplate.opsForHash().multiGet(key, hKeys);
     }
     //endregion
+
+    /**
+     * 执行Redis脚本
+     *
+     * @param script Redis脚本
+     * @param keys 键列表
+     * @param args 参数列表
+     * @return 脚本执行结果
+     */
+    public <T> T execute(RedisScript<T> script, List<String> keys, Object... args) {
+        return (T) redisTemplate.execute(script, keys, args);
+    }
 }

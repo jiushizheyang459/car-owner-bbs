@@ -18,6 +18,7 @@ import com.ori.service.ArticleService;
 import com.ori.service.CategoryService;
 import com.ori.service.CommentService;
 import com.ori.service.FollowsService;
+import com.ori.service.LikeService;
 import com.ori.utils.BeanCopyUtils;
 import com.ori.utils.RedisCache;
 import com.ori.utils.SecurityUtils;
@@ -52,6 +53,8 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
     private FollowsService followsService;
     @Autowired
     private CommentService commentService;
+    @Autowired
+    private LikeService likeService;
 
     /**
      * 查询热门文章
@@ -130,6 +133,8 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         List<NewArticleVo> vos = articles.stream()
                 .map(article -> {
                     User user = userMap.getOrDefault(article.getCreateById(), new User());
+                    // 获取真实点赞数量
+                    Long likeCount = likeService.getLikeCount(article.getId());
 
                     return new NewArticleVo(
                             article.getId(),
@@ -139,7 +144,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
                             article.getContent(),
                             article.getThumbnail(),
                             article.getViewCount(),
-                            10L
+                            likeCount
                     );
                 })
                 .collect(Collectors.toList());
@@ -188,6 +193,18 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
                 .map(article -> {
                     User user = userMap.getOrDefault(article.getCreateById(), new User());
                     Integer commentCount = commentService.commentCount(article.getId());
+                    
+                    // 获取点赞数量
+                    Long likeCount = likeService.getLikeCount(article.getId());
+                    
+                    // 获取当前用户是否点赞
+                    Boolean isLiked = Boolean.FALSE;
+                    try {
+                        Long currentUserId = SecurityUtils.getUserId();
+                        isLiked = likeService.isLiked(article.getId(), currentUserId);
+                    } catch (Exception e) {
+                        log.debug("用户未登录，无法获取点赞状态");
+                    }
 
                     return new ArticleListVo(
                             article.getId(),
@@ -195,8 +212,8 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
                             user.getAvatar(),
                             article.getTitle(),
                             article.getContent(),
-                            Boolean.FALSE,
-                            10L,
+                            isLiked,
+                            likeCount,
                             commentCount,
                             article.getViewCount(),
                             Boolean.FALSE
@@ -265,9 +282,14 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
             vo.setTitle(article.getTitle());
             vo.setContent(article.getContent());
             vo.setViewCount(article.getViewCount());
-            vo.setFavourCount(10L); // TODO: 替换为真实点赞数量
+            
+            // 获取真实点赞数量
+            vo.setLikeCount(likeService.getLikeCount(article.getId()));
+            
+            // 获取当前用户是否点赞
+            vo.setLikeFlag(likeService.isLiked(article.getId(), userId));
+            
             vo.setCommentCount(commentService.commentCount(article.getId()));
-            vo.setFavourFlag(false);
             vo.setSaveFlag(false);
 
             User author = userMap.get(article.getCreateById());

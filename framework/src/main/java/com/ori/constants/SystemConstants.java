@@ -72,9 +72,9 @@ public class SystemConstants {
     public static final long NORMAL_ARTICLES_EXPIRE_HOURS = 24;
 
     /**
-     * 消息批处理阈值
+     * 浏览量消息批处理阈值
      */
-    public static final int BATCH_SIZE = 100;
+    public static final int VIEW_COUNT_BATCH_SIZE = 100;
 
     /**
      * 热门文章判定阈值
@@ -86,4 +86,26 @@ public class SystemConstants {
      * 避免一次处理过多数据
      */
     public static final int VIEW_COUNT_SINGLE_SYNC_COUNT = 20;
+
+    /**
+     * 点赞消息批处理阈值
+     */
+    public static final int LIKE_BATCH_SIZE = 100;
+
+    /**
+     * Redis里文章点赞量的Key
+     */
+    public static final String ARTICLE_LIKE_COUNT_KEY = "article:like:count:";
+
+    /**
+     * Redis里文章点赞用户的Key
+     */
+    public static final String ARTICLE_LIKE_USERS_KEY = "article:like:users:";
+
+    /**
+     * 文章点赞Redis key过期时间
+     */
+    public static final int LIKE_CACHE_EXPIRE_DAYS = 7;
+
+    public static final String LIKE_CHANGED_ARTICLE_KEY = "article:like:changed";
 }
