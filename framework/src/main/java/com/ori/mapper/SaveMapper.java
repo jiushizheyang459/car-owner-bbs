@@ -28,7 +28,7 @@ public interface SaveMapper extends BaseMapper<Save> {
     /**
      * 将取消收藏的文章恢复收藏
      *
-     * @param existingSaveId 取消收藏的收藏表ID
+     * @param existingSaveId 取消收藏的收藏表数据ID
      * @return 是否更新成功
      */
     @Update("UPDATE tb_save SET del_flag = 0, update_time = NOW() WHERE id = #{existingSaveId}")

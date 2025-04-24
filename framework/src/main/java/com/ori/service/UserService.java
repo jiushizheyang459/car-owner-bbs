@@ -18,11 +18,4 @@ public interface UserService extends IService<User> {
     void updateUserInfo(User user);
 
     void register(User user);
-
-    /**
-     * 查询推荐关注
-     *
-     * @return 根据发布文章浏览量从高到低排序的前5个用户
-     */
-    List<UserInfoVo> getRecommendedAttention();
 }

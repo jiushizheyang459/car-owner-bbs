@@ -39,15 +39,4 @@ public class UserController {
         userService.register(user);
         return ResponseResult.okResult();
     }
-
-    /**
-     * 查询推荐关注
-     *
-     * @return 根据发布文章浏览量从高到低排序的前5个用户
-     */
-    @GetMapping("/getRecommendedAttention")
-    public ResponseResult getRecommendedAttention() {
-        List<UserInfoVo> vos = userService.getRecommendedAttention();
-        return ResponseResult.okResult(vos);
-    }
 }

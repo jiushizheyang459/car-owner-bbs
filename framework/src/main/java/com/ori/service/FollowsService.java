@@ -3,6 +3,7 @@ package com.ori.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.ori.domain.entity.Follows;
 import com.ori.domain.vo.FollowsListVo;
+import com.ori.domain.vo.RecommendFollowsListVo;
 
 import java.util.List;
 
@@ -35,4 +36,11 @@ public interface FollowsService extends IService<Follows> {
      * @param followedId 被关注者id
      */
     void deleteFollows(Long followedId);
+
+    /**
+     * 查询推荐关注
+     *
+     * @return 根据发布文章浏览量从高到低排序的前5个用户
+     */
+    List<RecommendFollowsListVo> recommendFollowsList();
 }

@@ -90,7 +90,11 @@ public class SaveServiceImpl extends ServiceImpl<SaveMapper, Save> implements Sa
                 return;
             } else {
                 // 曾收藏过，恢复收藏
-                getBaseMapper().reSave(existingSave.getId());
+                boolean success = getBaseMapper().reSave(existingSave.getId());
+
+                if (!success) {
+                    throw new SystemException(AppHttpCodeEnum.SYSTEM_ERROR);
+                }
                 return;
             }
         }
@@ -110,9 +114,9 @@ public class SaveServiceImpl extends ServiceImpl<SaveMapper, Save> implements Sa
         // 直接更新 `del_flag`，如果受影响行数为 0，说明本来就没收藏
         boolean updated = lambdaUpdate()
                 .set(Save::getDelFlag, 1)
+                .set(Save::getUpdateTime, LocalDateTime.now())
                 .eq(Save::getUserId, userId)
                 .eq(Save::getArticleId, articleId)
-                .eq(Save::getDelFlag, 0) // 只更新已收藏
                 .update();
 
         if (!updated) {

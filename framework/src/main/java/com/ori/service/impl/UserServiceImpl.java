@@ -95,41 +95,4 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 .count();
         return count > 0;
     }
-
-    @Override
-    public List<UserInfoVo> getRecommendedAttention() {
-        Long userId = SecurityUtils.getUserId();
-
-        // 计算每个用户的总浏览量并存入 Map
-        Map<User, Long> userViewCountMap = userService.lambdaQuery().list()
-                .stream()
-                .collect(Collectors.toMap(
-                        user -> user,
-                        user -> articleService.lambdaQuery()
-                                .eq(Article::getCreateById, user.getId())
-                                .eq(Article::getStatus, 0)
-                                .list()
-                                .stream()
-                                .mapToLong(Article::getViewCount)
-                                .sum()
-                ));
-
-        // 按总浏览量降序排序
-        List<Map.Entry<User, Long>> sortedUsers = userViewCountMap.entrySet().stream()
-                .sorted(Map.Entry.<User, Long>comparingByValue(Comparator.reverseOrder()))
-                .collect(Collectors.toList());
-
-        // 取前 5 名
-        List<UserInfoVo> vos = new ArrayList<>();
-        int count = 0;
-        for (Map.Entry<User, Long> entry : sortedUsers) {
-            if (!entry.getKey().getId().equals(userId)) { // 排除当前用户
-                vos.add(new UserInfoVo(entry.getKey()));
-                count++;
-            }
-            if (count == 5) break;
-        }
-
-        return vos;
-    }
 }

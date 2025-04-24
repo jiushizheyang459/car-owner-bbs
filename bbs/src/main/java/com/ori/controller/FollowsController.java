@@ -3,6 +3,8 @@ package com.ori.controller;
 
 import com.ori.domain.ResponseResult;
 import com.ori.domain.vo.FollowsListVo;
+import com.ori.domain.vo.RecommendFollowsListVo;
+import com.ori.domain.vo.UserInfoVo;
 import com.ori.service.FollowsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -55,6 +57,17 @@ public class FollowsController{
     public ResponseResult delete(Long followedId) {
         followsService.deleteFollows(followedId);
         return ResponseResult.okResult();
+    }
+
+    /**
+     * 查询推荐关注
+     *
+     * @return 根据发布文章浏览量从高到低排序的前5个用户
+     */
+    @GetMapping("/recommendFollowsList")
+    public ResponseResult recommendFollowsList() {
+        List<RecommendFollowsListVo> vos = followsService.recommendFollowsList();
+        return ResponseResult.okResult(vos);
     }
 }
 

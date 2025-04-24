@@ -16,12 +16,17 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.concurrent.TimeUnit;
+import java.util.HashSet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 点赞定时任务
  */
 @Component
 public class LikeScheduledTask {
+
+    private static final Logger log = LoggerFactory.getLogger(LikeScheduledTask.class);
 
     @Autowired
     private LikeConsumer likeConsumer;
@@ -51,14 +56,36 @@ public class LikeScheduledTask {
     @Scheduled(cron = "0 */10 * * * *")
     public void syncFromDatabaseToRedis() {
         // 从 Redis 中获取变更过的文章 ID 集合
-        Set<String> changedArticleIdStrs = redisCache.getCacheSet(SystemConstants.LIKE_CHANGED_ARTICLE_KEY);
-        if (changedArticleIdStrs == null || changedArticleIdStrs.isEmpty()) {
+        Set<Object> changedArticleIdObjs = redisCache.getCacheSet(SystemConstants.LIKE_CHANGED_ARTICLE_KEY);
+        if (changedArticleIdObjs == null || changedArticleIdObjs.isEmpty()) {
             return;
         }
 
-        Set<Long> changedArticleIds = changedArticleIdStrs.stream()
-                .map(Long::parseLong)
-                .collect(Collectors.toSet());
+        // 处理不同类型的返回值，确保能正确转换为Long类型
+        Set<Long> changedArticleIds = new HashSet<>();
+        for (Object obj : changedArticleIdObjs) {
+            try {
+                if (obj instanceof String) {
+                    changedArticleIds.add(Long.parseLong((String) obj));
+                } else if (obj instanceof com.alibaba.fastjson.JSONArray) {
+                    // 处理JSONArray类型
+                    com.alibaba.fastjson.JSONArray jsonArray = (com.alibaba.fastjson.JSONArray) obj;
+                    for (int i = 0; i < jsonArray.size(); i++) {
+                        Object element = jsonArray.get(i);
+                        if (element instanceof String) {
+                            changedArticleIds.add(Long.parseLong((String) element));
+                        } else if (element instanceof Number) {
+                            changedArticleIds.add(((Number) element).longValue());
+                        }
+                    }
+                } else if (obj instanceof Number) {
+                    changedArticleIds.add(((Number) obj).longValue());
+                }
+            } catch (Exception e) {
+                // 记录错误但继续处理其他元素
+                log.error("处理文章ID时出错: {}", obj, e);
+            }
+        }
 
         for (Long articleId : changedArticleIds) {
             // 查询数据库中的最新点赞数量
