@@ -81,6 +81,19 @@ public class ArticleController {
     }
 
     /**
+     * 分页查询当前用户的草稿文章
+     *
+     * @param pageNum 多少页
+     * @param size 每页多少条
+     * @return 当前用户的草稿文章
+     */
+    @GetMapping("/draftArticleList")
+    public ResponseResult draftArticleList(Integer pageNum, Integer size) {
+        PageVo vo = articleService.draftArticleList(pageNum, size);
+        return ResponseResult.okResult(vo);
+    }
+
+    /**
      * 根据文章ID查询文章详情
      *
      * @param id 文章ID
@@ -117,6 +130,18 @@ public class ArticleController {
     @PostMapping
     public ResponseResult addArticle(@RequestBody AddArticleDto addArticleDto) {
         articleService.addArticle(addArticleDto);
+        return ResponseResult.okResult();
+    }
+
+    /**
+     * 新增草稿文章
+     *
+     * @param addArticleDto 要新增文章数据
+     * @return 新增结果
+     */
+    @PostMapping("/addDraftArticle")
+    public ResponseResult addDraftArticle(@RequestBody AddArticleDto addArticleDto) {
+        articleService.addDraftArticle(addArticleDto);
         return ResponseResult.okResult();
     }
 

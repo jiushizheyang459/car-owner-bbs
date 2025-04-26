@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class UpdateArticleDto {
+public class UpdateArticleDto extends AddArticleDto{
 
     private Long id;
 }

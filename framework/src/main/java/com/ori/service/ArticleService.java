@@ -46,6 +46,15 @@ public interface ArticleService extends IService<Article> {
     PageVo FollowArticleList(Integer pageNum, Integer pageSize);
 
     /**
+     * 分页查询当前用户的草稿文章
+     *
+     * @param pageNum 多少页
+     * @param pageSize 每页多少条
+     * @return 当前用户的草稿文章
+     */
+    PageVo draftArticleList(Integer pageNum, Integer pageSize);
+
+    /**
      * 根据文章ID查询文章详情
      *
      * @param id
@@ -66,6 +75,13 @@ public interface ArticleService extends IService<Article> {
      * @param addArticleDto 要新增文章数据
      */
     void addArticle(AddArticleDto addArticleDto);
+
+    /**
+     * 新增草稿文章
+     *
+     * @param addArticleDto 要新增文章数据
+     */
+    void addDraftArticle(AddArticleDto addArticleDto);
 
     /**
      * 修改文章

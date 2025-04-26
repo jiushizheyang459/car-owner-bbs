@@ -60,4 +60,19 @@ public class ArticleDetailVo {
      * 浏览量
      */
     private Long viewCount;
+
+    /**
+     * 是否收藏
+     */
+    private Boolean saveFlag;
+
+    /**
+     * 是否点赞
+     */
+    private Boolean likeFlag;
+
+    /**
+     * 点赞数量
+     */
+    private Long likeCount;
 }

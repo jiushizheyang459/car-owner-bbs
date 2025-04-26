@@ -28,8 +28,20 @@ public class MyMetaObjectHandler implements MetaObjectHandler {
 
     @Override
     public void updateFill(MetaObject metaObject) {
-        this.setFieldValByName("updateBy", SecurityUtils.getNickname(), metaObject);
-        this.setFieldValByName("updateById", SecurityUtils.getUserId(), metaObject);
+        String nickname = null;
+        Long userId = null;
+        try {
+            if (SecurityUtils.getLoginUser() != null) {
+                nickname = SecurityUtils.getNickname();
+                userId = SecurityUtils.getUserId();
+            }
+        } catch (Exception e) {
+            // 如果拿不到用户，默认用 游客
+            nickname = "游客";
+            userId = -1L;
+        }
+        this.setFieldValByName("updateBy", nickname, metaObject);
+        this.setFieldValByName("updateById", userId, metaObject);
         this.setFieldValByName("updateTime", LocalDateTime.now(), metaObject);
     }
 }

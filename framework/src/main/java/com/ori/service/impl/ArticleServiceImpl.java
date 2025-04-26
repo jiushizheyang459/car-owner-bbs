@@ -317,6 +317,23 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         return new PageVo(vos, page.getTotal());
     }
 
+    @Override
+    public PageVo draftArticleList(Integer pageNum, Integer pageSize) {
+        Long userId = SecurityUtils.getUserId();
+
+        Page<Article> page = lambdaQuery()
+                .eq(Article::getStatus, SystemConstants.ARTICLE_STATUS_DRAFT)
+                .eq(Article::getCreateById, userId)
+                .orderByDesc(Article::getIsTop)
+                .page(new Page<>(pageNum, pageSize));
+
+        List<Article> articles = page.getRecords();
+
+        List<DraftArticleListVo> vos = BeanCopyUtils.copyBeanList(articles, DraftArticleListVo.class);
+
+        return new PageVo(vos, page.getTotal());
+    }
+
     /**
      * 根据文章ID查询文章详情
      *
@@ -346,6 +363,29 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         Category category = categoryService.getById(article.getCategoryId());
         String categoryName = Optional.ofNullable(category).orElseGet(Category::new).getName();
         vo.setCategoryName(categoryName);
+
+        // 获取点赞数量
+        Long likeCount = likeService.getLikeCount(article.getId());
+        vo.setLikeCount(likeCount);
+        
+        // 获取当前用户是否点赞
+        Boolean isLiked = Boolean.FALSE;
+        try {
+            Long currentUserId = SecurityUtils.getUserId();
+            isLiked = likeService.isLiked(article.getId(), currentUserId);
+        } catch (Exception e) {
+            log.debug("用户未登录，无法获取点赞状态");
+        }
+        vo.setLikeFlag(isLiked);
+        
+        // 获取当前用户是否收藏
+        Boolean isSaved = Boolean.FALSE;
+        try {
+            isSaved = saveService.isArticleSaved(article.getId());
+        } catch (Exception e) {
+            log.debug("用户未登录，无法获取收藏状态");
+        }
+        vo.setSaveFlag(isSaved);
 
         return vo;
     }
@@ -426,6 +466,15 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         if (!StringUtils.hasText(article.getContent())) {
             throw new SystemException(AppHttpCodeEnum.ARTICLE_NOT_NULL);
         }
+        save(article);
+    }
+
+    @Override
+    public void addDraftArticle(AddArticleDto addArticleDto) {
+        Article article = BeanCopyUtils.copyBean(addArticleDto, Article.class);
+
+        article.setStatus(1);
+
         save(article);
     }
 
