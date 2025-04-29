@@ -24,4 +24,6 @@ public class UserInfoVo {
     private Integer sex;
 
     private String email;
+
+    private String roleKey;
 }
