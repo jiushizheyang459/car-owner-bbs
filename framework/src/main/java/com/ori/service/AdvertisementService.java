@@ -6,6 +6,7 @@ import com.ori.domain.dto.UpdateAdvertisementDto;
 import com.ori.domain.entity.Advertisement;
 import com.ori.domain.vo.AdvertisementDetailVo;
 import com.ori.domain.vo.AdvertisementListVo;
+import com.ori.domain.vo.PageVo;
 
 import java.util.List;
 
@@ -19,12 +20,27 @@ import java.util.List;
 public interface AdvertisementService extends IService<Advertisement> {
 
     /**
-     * 查询所有广告
+     * 分页查询所有广告
+     * 按创建时间降序排列
+     * 只查询未删除的
      *
-     * @return 所有广告数据
+     * @param pageNum 多少页
+     * @param pageSize 每页多少条
+     * @return 分页查询结果
      */
-    List<AdvertisementListVo> advertisementList();
+    PageVo advertisementList(Integer pageNum, Integer pageSize);
 
+    /**
+     * 分页查询前端可显示的广告
+     * 只查询未删除的
+     * 查询大于开始时间小于等于结束时间的结果
+     * 只查询状态是启用的
+     *
+     * @param pageNum 多少页
+     * @param pageSize 每页多少条
+     * @return 前端可显示的广告
+     */
+    PageVo displayAdvertisementList(Integer pageNum, Integer pageSize);
 
     /**
      * 根据广告ID查询广告详情

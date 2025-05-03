@@ -47,6 +47,21 @@ public class ArticleDetailVo {
     private String content;
 
     /**
+     * 作者昵称
+     */
+    private String nickName;
+
+    /**
+     * 头像地址
+     */
+    private String avatar;
+
+    /**
+     * 作者id
+     */
+    private Long createById;
+
+    /**
      * 作者
      */
     private String createBy;

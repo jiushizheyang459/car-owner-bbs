@@ -33,6 +33,11 @@ public class FollowsListVo {
     private String followedUser;
 
     /**
+     * 被关注者头像
+     */
+    private String followedAvatar;
+
+    /**
      * 关注时间
      */
     private LocalDateTime createTime;

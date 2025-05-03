@@ -72,5 +72,14 @@ public class Announcement {
      */
     private Integer delFlag;
 
+    /**
+     * 公告开始时间
+     */
+    private LocalDateTime startTime;
+
+    /**
+     * 公告结束时间
+     */
+    private LocalDateTime endTime;
 }
 

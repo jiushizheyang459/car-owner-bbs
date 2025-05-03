@@ -1,16 +1,13 @@
-package com.ori.domain.vo;
+package com.ori.domain.dto;
 
-import com.ori.domain.entity.User;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.Accessors;
 
 @Data
-@Accessors(chain = true)
+@AllArgsConstructor
 @NoArgsConstructor
-public class UserInfoVo {
-    private Long id;
-
+public class AddUserdto {
     /**
      * 用户名
      */
@@ -22,14 +19,14 @@ public class UserInfoVo {
     private String nickName;
 
     /**
-     * 头像
+     * 密码
      */
-    private String avatar;
+    private String password;
 
     /**
-     * 用户性别（0男，1女，2未知）
+     * 账号状态（0正常 1停用）
      */
-    private Integer sex;
+    private Integer status;
 
     /**
      * 邮箱
@@ -42,12 +39,12 @@ public class UserInfoVo {
     private String phoneNumber;
 
     /**
-     * 角色权限字符
+     * 用户性别（0男，1女，2未知）
      */
-    private String roleKey;
+    private Integer sex;
 
     /**
-     * 角色名称
+     * 头像
      */
-    private String roleName;
+    private String avatar;
 }

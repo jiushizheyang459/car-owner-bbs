@@ -5,10 +5,12 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@ApiModel(description = "添加资讯dto")
+@ApiModel(description = "添加广告dto")
 public class AddAdvertisementDto {
 
     /**
@@ -35,4 +37,24 @@ public class AddAdvertisementDto {
      * 描述
      */
     private String description;
+
+    /**
+     * 跳转链接
+     */
+    private String link;
+
+    /**
+     * 状态（0正常 1停用）
+     */
+    private Integer status;
+
+    /**
+     * 广告开始时间
+     */
+    private LocalDateTime startTime;
+
+    /**
+     * 广告结束时间
+     */
+    private LocalDateTime endTime;
 }

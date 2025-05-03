@@ -11,9 +11,9 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class SaveListVo {
     /**
-     * ID
+     * 文章ID
      */
-    private Long id;
+    private Long articleId;
 
     /**
      * 文章标题
@@ -26,7 +26,27 @@ public class SaveListVo {
     private String articleContent;
 
     /**
+     * 文章缩略图
+     */
+    private String articleThumbnail;
+
+    /**
+     * 作者昵称
+     */
+    private String nickName;
+
+    /**
+     * 头像地址
+     */
+    private String avatar;
+
+    /**
      * 收藏时间
      */
     private LocalDateTime createTime;
+
+    /**
+     * 浏览量
+     */
+    private Long viewCount;
 }

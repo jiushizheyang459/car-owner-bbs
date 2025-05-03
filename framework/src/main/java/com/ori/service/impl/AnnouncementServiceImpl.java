@@ -1,13 +1,16 @@
 package com.ori.service.impl;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ori.domain.dto.AddAnnouncementDto;
 import com.ori.domain.dto.UpdateAnnouncementDto;
+import com.ori.domain.entity.Advertisement;
 import com.ori.domain.entity.Announcement;
 import com.ori.domain.entity.Information;
 import com.ori.domain.vo.AnnouncementDetailVo;
 import com.ori.domain.vo.AnnouncementListVo;
 import com.ori.domain.vo.InformationDetailVo;
+import com.ori.domain.vo.PageVo;
 import com.ori.enums.AppHttpCodeEnum;
 import com.ori.exception.SystemException;
 import com.ori.mapper.AnnouncementMapper;
@@ -18,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -31,12 +35,16 @@ import java.util.stream.Collectors;
  */
 @Service("announcementService")
 public class AnnouncementServiceImpl extends ServiceImpl<AnnouncementMapper, Announcement> implements AnnouncementService {
+
     @Override
-    public List<AnnouncementListVo> announcementList() {
-        List<Announcement> announcements = lambdaQuery()
+    public PageVo announcementList(Integer pageNum, Integer pageSize) {
+        Page<Announcement> page = lambdaQuery()
                 .orderByDesc(Announcement::getCreateTime)
-                .last("LIMIT 5")
-                .list();
+                .eq(Announcement::getDelFlag, Boolean.FALSE)
+                .page(new Page<>(pageNum, pageSize));
+
+        List<Announcement> announcements = page.getRecords();
+
         List<AnnouncementListVo> vos = announcements.stream()
                 .map(announcement -> {
                     LocalDate createDate = announcement.getCreateTime().toLocalDate();
@@ -44,12 +52,43 @@ public class AnnouncementServiceImpl extends ServiceImpl<AnnouncementMapper, Ann
                     return new AnnouncementListVo(
                             announcement.getId(),
                             announcement.getTitle(),
-                            createDate
+                            createDate,
+                            announcement.getStartTime(),
+                            announcement.getEndTime()
                     );
                 })
                 .collect(Collectors.toList());
 
-        return vos;
+        return new PageVo(vos, page.getTotal());
+    }
+
+    @Override
+    public PageVo displayAnnouncementList(Integer pageNum, Integer pageSize) {
+        LocalDateTime nowTime = LocalDateTime.now();
+        Page<Announcement> page = lambdaQuery()
+                .orderByDesc(Announcement::getCreateTime)
+                .eq(Announcement::getDelFlag, Boolean.FALSE)
+                .lt(Announcement::getStartTime, nowTime)
+                .ge(Announcement::getEndTime, nowTime)
+                .page(new Page<>(pageNum, pageSize));
+
+        List<Announcement> announcements = page.getRecords();
+
+        List<AnnouncementListVo> vos = announcements.stream()
+                .map(announcement -> {
+                    LocalDate createDate = announcement.getCreateTime().toLocalDate();
+
+                    return new AnnouncementListVo(
+                            announcement.getId(),
+                            announcement.getTitle(),
+                            createDate,
+                            announcement.getStartTime(),
+                            announcement.getEndTime()
+                    );
+                })
+                .collect(Collectors.toList());
+
+        return new PageVo(vos, page.getTotal());
     }
 
     @Override

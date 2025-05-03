@@ -26,4 +26,12 @@ public interface RoleService extends IService<Role> {
      * @return 角色权限字符串，如果不存在返回null
      */
     String selectRoleKeyByUserId(Long userId);
+
+    /**
+     * 根据用户ID查询角色名称
+     *
+     * @param userId 用户ID
+     * @return 角色名称，如果不存在返回null
+     */
+    String selectRoleNameByUserId(Long userId);
 }

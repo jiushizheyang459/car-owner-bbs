@@ -16,4 +16,8 @@ public class AnnouncementDetailVo {
     private String title;
 
     private LocalDateTime creatTime;
+
+    private LocalDateTime startTime;
+
+    private LocalDateTime endTime;
 }

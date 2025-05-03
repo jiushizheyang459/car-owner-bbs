@@ -1,5 +1,6 @@
 package com.ori.service.impl;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ori.domain.dto.AddAdvertisementDto;
 import com.ori.domain.dto.UpdateAdvertisementDto;
@@ -8,6 +9,7 @@ import com.ori.domain.entity.Information;
 import com.ori.domain.vo.AdvertisementDetailVo;
 import com.ori.domain.vo.AdvertisementListVo;
 import com.ori.domain.vo.InformationDetailVo;
+import com.ori.domain.vo.PageVo;
 import com.ori.enums.AppHttpCodeEnum;
 import com.ori.exception.SystemException;
 import com.ori.mapper.AdvertisementMapper;
@@ -16,6 +18,7 @@ import com.ori.utils.BeanCopyUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -32,21 +35,57 @@ import java.util.stream.Collectors;
 public class AdvertisementServiceImpl extends ServiceImpl<AdvertisementMapper, Advertisement> implements AdvertisementService {
 
     /**
-     * 查询所有广告
+     * 分页查询所有广告
+     * 按创建时间降序排列
+     * 只查询未删除的
      *
-     * @return 所有广告数据
+     * @param pageNum 多少页
+     * @param pageSize 每页多少条
+     * @return 分页查询结果
      */
     @Override
-    public List<AdvertisementListVo> advertisementList() {
+    public PageVo advertisementList(Integer pageNum, Integer pageSize) {
 
-        List<Advertisement> advertisements = lambdaQuery()
-                .orderByAsc(Advertisement::getPriority)
-                .eq(Advertisement::getDelFlag, 0)
-                .list();
+        Page<Advertisement> page = lambdaQuery()
+                .orderByDesc(Advertisement::getCreateTime)
+                .eq(Advertisement::getDelFlag, Boolean.FALSE)
+                .page(new Page<>(pageNum, pageSize));
+
+        List<Advertisement> advertisements = page.getRecords();
 
         List<AdvertisementListVo> vos = BeanCopyUtils.copyBeanList(advertisements, AdvertisementListVo.class);
 
-        return vos;
+        return new PageVo(vos, page.getTotal());
+    }
+
+    /**
+     * 分页查询前端可显示的广告
+     * 只查询未删除的
+     * 查询大于开始时间小于等于结束时间的结果
+     * 只查询状态是启用的
+     *
+     * @param pageNum 多少页
+     * @param pageSize 每页多少条
+     * @return 前端可显示的广告
+     */
+    @Override
+    public PageVo displayAdvertisementList(Integer pageNum, Integer pageSize) {
+
+        LocalDateTime nowTime = LocalDateTime.now();
+
+        Page<Advertisement> page = lambdaQuery()
+                .orderByAsc(Advertisement::getPriority)
+                .eq(Advertisement::getDelFlag, Boolean.FALSE)
+                .lt(Advertisement::getStartTime, nowTime)
+                .ge(Advertisement::getEndTime, nowTime)
+                .eq(Advertisement::getStatus, Boolean.FALSE)
+                .page(new Page<>(pageNum, pageSize));
+
+        List<Advertisement> advertisements = page.getRecords();
+
+        List<AdvertisementListVo> vos = BeanCopyUtils.copyBeanList(advertisements, AdvertisementListVo.class);
+
+        return new PageVo(vos, page.getTotal());
     }
 
     @Override

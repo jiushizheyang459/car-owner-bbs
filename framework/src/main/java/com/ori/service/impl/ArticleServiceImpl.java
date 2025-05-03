@@ -387,6 +387,9 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         }
         vo.setSaveFlag(isSaved);
 
+        User user = userMapper.selectById(article.getCreateById());
+        vo.setAvatar(user.getAvatar());
+
         return vo;
     }
 

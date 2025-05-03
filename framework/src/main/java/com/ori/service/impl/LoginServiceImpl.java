@@ -9,6 +9,7 @@ import com.ori.domain.vo.UserLoginVo;
 import com.ori.exception.SystemException;
 import com.ori.service.LoginService;
 import com.ori.service.MenuService;
+import com.ori.service.RoleService;
 import com.ori.service.UserRoleService;
 import com.ori.utils.BeanCopyUtils;
 import com.ori.utils.JwtUtil;
@@ -38,7 +39,7 @@ public class LoginServiceImpl implements LoginService {
     private MenuService menuService;
 
     @Autowired
-    private RoleServiceImpl roleService;
+    private RoleService roleService;
 
     @Override
     public UserLoginVo login(User user) {
@@ -63,8 +64,11 @@ public class LoginServiceImpl implements LoginService {
 
         //把User转换为UserInfoVo
         UserInfoVo userInfoVo = BeanCopyUtils.copyBean(loginUser.getUser(), UserInfoVo.class);
+
         String roleKey = roleService.selectRoleKeyByUserId(loginUser.getUser().getId());
         userInfoVo.setRoleKey(roleKey);
+        String roleName = roleService.selectRoleNameByUserId(loginUser.getUser().getId());
+        userInfoVo.setRoleName(roleName);
 
         //把token、userinfo和menus封装 返回
         UserLoginVo vo = new UserLoginVo(jwt, userInfoVo, menus);

@@ -6,6 +6,7 @@ import com.ori.domain.dto.UpdateAnnouncementDto;
 import com.ori.domain.entity.Announcement;
 import com.ori.domain.vo.AnnouncementDetailVo;
 import com.ori.domain.vo.AnnouncementListVo;
+import com.ori.domain.vo.PageVo;
 
 import java.util.List;
 
@@ -19,11 +20,26 @@ import java.util.List;
 public interface AnnouncementService extends IService<Announcement> {
 
     /**
-     * 查询所有公告
+     * 分页查询公告
+     * 按时间降序
+     * 只查询未删除的
      *
-     * @return 所有公告
+     * @param pageNum 多少页
+     * @param pageSize 每页多少条
+     * @return 按时间降序排列的分页查询结果
      */
-    List<AnnouncementListVo> announcementList();
+    PageVo announcementList(Integer pageNum, Integer pageSize);
+
+    /**
+     * 分页查询可显示的公告
+     * 按时间降序
+     * 查询大于开始时间小于等于结束时间的结果
+     *
+     * @param pageNum 多少页
+     * @param pageSize 每页多少条
+     * @return 可显示的公告
+     */
+    PageVo displayAnnouncementList(Integer pageNum, Integer pageSize);
 
     /**
      * 根据公告ID查询公告详情

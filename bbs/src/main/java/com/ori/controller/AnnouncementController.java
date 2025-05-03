@@ -6,10 +6,7 @@ import com.ori.domain.dto.AddAnnouncementDto;
 import com.ori.domain.dto.AddInformationDto;
 import com.ori.domain.dto.UpdateAnnouncementDto;
 import com.ori.domain.dto.UpdateInformationDto;
-import com.ori.domain.vo.AnnouncementDetailVo;
-import com.ori.domain.vo.AnnouncementListVo;
-import com.ori.domain.vo.InformationDetailVo;
-import com.ori.domain.vo.informationListVo;
+import com.ori.domain.vo.*;
 import com.ori.service.AnnouncementService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -32,14 +29,32 @@ public class AnnouncementController {
     private AnnouncementService announcementService;
 
     /**
-     * 查询最新的5篇公告
+     * 分页查询公告
+     * 按时间降序
      *
-     * @return 最新的5篇公告
+     * @param pageNum 多少页
+     * @param pageSize 每页多少条
+     * @return 按时间降序排列的分页查询结果
      */
-    @GetMapping
-    public ResponseResult announcementList() {
-        List<AnnouncementListVo> vos = announcementService.announcementList();
-        return ResponseResult.okResult(vos);
+    @GetMapping("/announcementList")
+    public ResponseResult announcementList(Integer pageNum, Integer pageSize) {
+        PageVo vo = announcementService.announcementList(pageNum, pageSize);
+        return ResponseResult.okResult(vo);
+    }
+
+    /**
+     * 分页查询可显示的公告
+     * 按时间降序
+     * 查询大于开始时间小于等于结束时间的结果
+     *
+     * @param pageNum 多少页
+     * @param pageSize 每页多少条
+     * @return 可显示的公告
+     */
+    @GetMapping("/displayAnnouncementList")
+    public ResponseResult displayAnnouncementList(Integer pageNum, Integer pageSize) {
+        PageVo vo = announcementService.displayAnnouncementList(pageNum, pageSize);
+        return ResponseResult.okResult(vo);
     }
 
     /**

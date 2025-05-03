@@ -60,22 +60,23 @@ public class FollowsServiceImpl extends ServiceImpl<FollowsMapper, Follows> impl
                 .flatMap(f -> Stream.of(f.getFollowerId(), f.getFollowedId()))
                 .collect(Collectors.toSet());
 
-        // 一次性查询所有用户昵称，减少 N+1 查询问题
-        Map<Long, String> userNickNameMap = userService.lambdaQuery()
-                .select(User::getId, User::getNickName)
+        // 一次性查询所有用户，减少 N+1 查询问题
+        Map<Long, User> userMap = userService.lambdaQuery()
                 .in(User::getId, userIds)
                 .list()
                 .stream()
-                .collect(Collectors.toMap(User::getId, User::getNickName));
+                .collect(Collectors.toMap(User::getId, user -> user));
 
         // 组装返回数据
         return follows.stream().map(follow -> {
             FollowsListVo vo = new FollowsListVo();
             vo.setId(follow.getId());
             vo.setFollowerId(follow.getFollowerId());
-            vo.setFollowerUser(userNickNameMap.get(follow.getFollowerId()));
+            vo.setFollowerUser(userMap.get(follow.getFollowerId()).getNickName());
             vo.setFollowedId(follow.getFollowedId());
-            vo.setFollowedUser(userNickNameMap.get(follow.getFollowedId()));
+            vo.setFollowedUser(userMap.get(follow.getFollowedId()).getUserName());
+            vo.setFollowedAvatar(userMap.get(follow.getFollowedId()).getAvatar());
+            vo.setCreateTime(follow.getCreateTime());
             return vo;
         }).collect(Collectors.toList());
     }

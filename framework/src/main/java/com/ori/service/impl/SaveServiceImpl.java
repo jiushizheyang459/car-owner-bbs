@@ -6,12 +6,14 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ori.domain.entity.Article;
 import com.ori.domain.entity.Follows;
 import com.ori.domain.entity.Save;
+import com.ori.domain.entity.User;
 import com.ori.domain.vo.ArticleDetailVo;
 import com.ori.domain.vo.PageVo;
 import com.ori.domain.vo.SaveListVo;
 import com.ori.enums.AppHttpCodeEnum;
 import com.ori.exception.SystemException;
 import com.ori.mapper.SaveMapper;
+import com.ori.mapper.UserMapper;
 import com.ori.service.ArticleService;
 import com.ori.service.SaveService;
 import com.ori.utils.SecurityUtils;
@@ -37,6 +39,8 @@ public class SaveServiceImpl extends ServiceImpl<SaveMapper, Save> implements Sa
 
     @Autowired
     private ArticleService articleService;
+    @Autowired
+    private UserMapper userMapper;
 
     @Override
     public PageVo saveList(Integer pageNum, Integer size) {
@@ -68,10 +72,14 @@ public class SaveServiceImpl extends ServiceImpl<SaveMapper, Save> implements Sa
         return saves.stream().map(save -> {
             ArticleDetailVo detail = articleMap.get(save.getArticleId());
             SaveListVo vo = new SaveListVo();
-            vo.setId(save.getId());
+            vo.setArticleId(detail.getId());
             vo.setArticleTitle(detail != null ? detail.getTitle() : "");
             vo.setArticleContent(detail != null ? detail.getContent() : "");
+            vo.setArticleThumbnail(detail != null ? detail.getThumbnail() : "");
+            vo.setNickName(detail != null ? detail.getCreateBy() : "");
+            vo.setAvatar(detail != null ? detail.getAvatar() : "");
             vo.setCreateTime(save.getCreateTime());
+            vo.setViewCount(detail != null ? detail.getViewCount() : 0);
             return vo;
         }).collect(Collectors.toList());
     }

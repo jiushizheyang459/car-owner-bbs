@@ -68,4 +68,30 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
         
         return role.getRoleKey();
     }
+
+    /**
+     * 根据用户ID查询角色名称
+     *
+     * @param userId 用户ID
+     * @return 角色名称，如果不存在返回null
+     */
+    @Override
+    public String selectRoleNameByUserId(Long userId) {
+        // 查询用户角色ID
+        UserRole userRole = userRoleService.lambdaQuery()
+                .eq(UserRole::getUserId, userId)
+                .one();
+
+        if (userRole == null) {
+            return null;
+        }
+
+        // 查询角色信息
+        Role role = getById(userRole.getRoleId());
+        if (role == null) {
+            return null;
+        }
+
+        return role.getRoleName();
+    }
 }
