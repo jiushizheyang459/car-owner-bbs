@@ -18,6 +18,7 @@ import com.ori.utils.SecurityUtils;
 import net.bytebuddy.implementation.bytecode.constant.IntegerConstant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -86,6 +87,7 @@ public class FollowsServiceImpl extends ServiceImpl<FollowsMapper, Follows> impl
      *
      * @param followedId 被关注者id
      */
+    @Transactional
     @Override
     public void addFollows(Long followedId) {
         Long userId = SecurityUtils.getUserId();
@@ -130,6 +132,7 @@ public class FollowsServiceImpl extends ServiceImpl<FollowsMapper, Follows> impl
      *
      * @param followedId 被关注者id
      */
+    @Transactional
     @Override
     public void deleteFollows(Long followedId) {
         Long userId = SecurityUtils.getUserId();

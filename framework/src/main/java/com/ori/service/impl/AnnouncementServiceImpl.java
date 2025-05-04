@@ -18,6 +18,7 @@ import com.ori.service.AnnouncementService;
 import com.ori.utils.BeanCopyUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
@@ -103,6 +104,7 @@ public class AnnouncementServiceImpl extends ServiceImpl<AnnouncementMapper, Ann
         return vo;
     }
 
+    @Transactional
     @Override
     public void addAnnouncement(AddAnnouncementDto addAnnouncementDto) {
         Announcement announcement = BeanCopyUtils.copyBean(addAnnouncementDto, Announcement.class);
@@ -113,6 +115,7 @@ public class AnnouncementServiceImpl extends ServiceImpl<AnnouncementMapper, Ann
         save(announcement);
     }
 
+    @Transactional
     @Override
     public void updateAnnouncement(UpdateAnnouncementDto updateAnnouncementDto) {
         Announcement announcement = getById(updateAnnouncementDto.getId());
@@ -123,6 +126,7 @@ public class AnnouncementServiceImpl extends ServiceImpl<AnnouncementMapper, Ann
         updateById(announcement);
     }
 
+    @Transactional
     @Override
     public void deleteAnnouncement(List<Long> ids) {
         if (ids == null || ids.isEmpty()) {

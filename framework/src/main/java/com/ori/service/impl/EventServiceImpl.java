@@ -20,6 +20,7 @@ import com.ori.utils.BeanCopyUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
@@ -195,6 +196,7 @@ public class EventServiceImpl extends ServiceImpl<EventMapper, Event> implements
         return vo;
     }
 
+    @Transactional
     @Override
     public void addEvent(AddEventDto addEventDto) {
         Event event = BeanCopyUtils.copyBean(addEventDto, Event.class);
@@ -205,6 +207,7 @@ public class EventServiceImpl extends ServiceImpl<EventMapper, Event> implements
         save(event);
     }
 
+    @Transactional
     @Override
     public void updateEvent(UpdateEventDto updateEventDto) {
         Event event = getById(updateEventDto.getId());
@@ -215,6 +218,7 @@ public class EventServiceImpl extends ServiceImpl<EventMapper, Event> implements
         updateById(event);
     }
 
+    @Transactional
     @Override
     public void deleteEvent(List<Long> ids) {
         if (ids == null || ids.isEmpty()) {

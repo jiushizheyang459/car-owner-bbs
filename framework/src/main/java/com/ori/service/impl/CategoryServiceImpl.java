@@ -16,6 +16,7 @@ import com.ori.service.CategoryService;
 import com.ori.utils.BeanCopyUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
@@ -53,6 +54,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
         return vos;
     }
 
+    @Transactional
     @Override
     public void addCategory(AddCategoryDto addCategoryDto) {
         Category category = BeanCopyUtils.copyBean(addCategoryDto, Category.class);
@@ -63,6 +65,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
         save(category);
     }
 
+    @Transactional
     @Override
     public void updateCategory(UpdateCategoryDto updateCategoryDto) {
         Category category = getById(updateCategoryDto.getId());
@@ -73,6 +76,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
         updateById(category);
     }
 
+    @Transactional
     @Override
     public void deleteCategory(List<Long> ids) {
         if (ids == null || ids.isEmpty()) {

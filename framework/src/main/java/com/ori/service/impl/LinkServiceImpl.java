@@ -13,6 +13,7 @@ import com.ori.mapper.LinkMapper;
 import com.ori.service.LinkService;
 import com.ori.utils.BeanCopyUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
@@ -36,6 +37,7 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, Link> implements Li
         return vos;
     }
 
+    @Transactional
     @Override
     public void addLink(AddLinkDto addLinkDto) {
         Link link = BeanCopyUtils.copyBean(addLinkDto, Link.class);
@@ -46,6 +48,7 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, Link> implements Li
         save(link);
     }
 
+    @Transactional
     @Override
     public void updateLink(UpdateLinkDto updateLinkDto) {
         Link link = getById(updateLinkDto.getId());
@@ -56,6 +59,7 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, Link> implements Li
         updateById(link);
     }
 
+    @Transactional
     @Override
     public void deleteLink(List<Long> ids) {
         if (ids == null || ids.isEmpty()) {

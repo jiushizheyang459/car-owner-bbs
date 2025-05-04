@@ -15,6 +15,7 @@ import com.ori.mapper.KnowledgeMapper;
 import com.ori.service.KnowledgeService;
 import com.ori.utils.BeanCopyUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
@@ -66,6 +67,7 @@ public class KnowledgeServiceImpl extends ServiceImpl<KnowledgeMapper, Knowledge
         return vo;
     }
 
+    @Transactional
     @Override
     public void addKnowledge(AddKnowledgeDto addKnowledgeDto) {
         Knowledge knowledge = BeanCopyUtils.copyBean(addKnowledgeDto, Knowledge.class);
@@ -76,6 +78,7 @@ public class KnowledgeServiceImpl extends ServiceImpl<KnowledgeMapper, Knowledge
         save(knowledge);
     }
 
+    @Transactional
     @Override
     public void updateKnowledge(UpdateKnowledgeDto updateKnowledgeDto) {
         Knowledge knowledge = getById(updateKnowledgeDto.getId());
@@ -86,6 +89,7 @@ public class KnowledgeServiceImpl extends ServiceImpl<KnowledgeMapper, Knowledge
         updateById(knowledge);
     }
 
+    @Transactional
     @Override
     public void deleteKnowledge(List<Long> ids) {
         if (ids == null || ids.isEmpty()) {

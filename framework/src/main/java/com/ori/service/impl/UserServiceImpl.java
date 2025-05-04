@@ -55,6 +55,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return vo;
     }
 
+    @Transactional
     @Override
     public void updateUserInfo(UpdateUserdto updateUserdto) {
         Long currentUserId = SecurityUtils.getUserId();
@@ -65,6 +66,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         updateById(user);
     }
 
+    @Transactional
     @Override
     public void register(AddUserdto addUserdto) {
         Long currentUserId = SecurityUtils.getUserId();
@@ -116,8 +118,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return count > 0;
     }
 
-    @Override
     @Transactional
+    @Override
     public void updatePassword(UpdatePasswordDto updatePasswordDto) {
         // 获取当前登录用户
         LoginUser loginUser = SecurityUtils.getLoginUser();

@@ -20,6 +20,7 @@ import com.ori.utils.SecurityUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -84,7 +85,7 @@ public class SaveServiceImpl extends ServiceImpl<SaveMapper, Save> implements Sa
         }).collect(Collectors.toList());
     }
 
-
+    @Transactional
     @Override
     public void addSave(Long articleId) {
         Long userId = SecurityUtils.getUserId();
@@ -114,7 +115,7 @@ public class SaveServiceImpl extends ServiceImpl<SaveMapper, Save> implements Sa
         save(save);
     }
 
-
+    @Transactional
     @Override
     public void deleteSave(Long articleId) {
         Long userId = SecurityUtils.getUserId();

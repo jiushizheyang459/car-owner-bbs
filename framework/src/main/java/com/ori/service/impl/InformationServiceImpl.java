@@ -18,6 +18,7 @@ import com.ori.utils.BeanCopyUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
@@ -115,6 +116,7 @@ public class InformationServiceImpl extends ServiceImpl<InformationMapper, Infor
         return vo;
     }
 
+    @Transactional
     @Override
     public void addInformation(AddInformationDto addInformationDto) {
         Information information = BeanCopyUtils.copyBean(addInformationDto, Information.class);
@@ -125,6 +127,7 @@ public class InformationServiceImpl extends ServiceImpl<InformationMapper, Infor
         save(information);
     }
 
+    @Transactional
     @Override
     public void updateInformation(UpdateInformationDto updateInformationDto) {
         Information information = getById(updateInformationDto.getId());
@@ -135,6 +138,7 @@ public class InformationServiceImpl extends ServiceImpl<InformationMapper, Infor
         updateById(information);
     }
 
+    @Transactional
     @Override
     public void deleteInformation(List<Long> ids) {
         if (ids == null || ids.isEmpty()) {

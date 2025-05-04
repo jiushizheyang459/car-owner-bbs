@@ -14,6 +14,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -28,6 +29,7 @@ public class LikeServiceImpl extends ServiceImpl<LikeMapper, Like> implements Li
     @Autowired
     private RedisCache redisCache;
 
+    @Transactional
     @Override
     public boolean toggleLike(Long articleId, Long userId) {
         String countKey = SystemConstants.ARTICLE_LIKE_COUNT_KEY + articleId;

@@ -29,6 +29,7 @@ import org.springframework.amqp.core.MessageDeliveryMode;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
@@ -393,6 +394,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         return vo;
     }
 
+    @Transactional
     @Override
     public void updateViewCount(Long id, String userIdentifier) {
         // 检查是否是重复访问，保证幂等性
@@ -462,6 +464,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         }
     }
 
+    @Transactional
     @Override
     public void addArticle(AddArticleDto addArticleDto) {
         Article article = BeanCopyUtils.copyBean(addArticleDto, Article.class);
@@ -472,6 +475,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         save(article);
     }
 
+    @Transactional
     @Override
     public void addDraftArticle(AddArticleDto addArticleDto) {
         Article article = BeanCopyUtils.copyBean(addArticleDto, Article.class);
@@ -481,6 +485,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         save(article);
     }
 
+    @Transactional
     @Override
     public void updateArticle(UpdateArticleDto updateArticleDto) {
         Article article = getById(updateArticleDto.getId());
@@ -491,6 +496,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         updateById(article);
     }
 
+    @Transactional
     @Override
     public void deleteArticle(List<Long> ids) {
         if (ids == null || ids.isEmpty()) {

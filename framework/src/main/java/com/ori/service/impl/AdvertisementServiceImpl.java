@@ -16,6 +16,7 @@ import com.ori.mapper.AdvertisementMapper;
 import com.ori.service.AdvertisementService;
 import com.ori.utils.BeanCopyUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
@@ -100,6 +101,7 @@ public class AdvertisementServiceImpl extends ServiceImpl<AdvertisementMapper, A
         return vo;
     }
 
+    @Transactional
     @Override
     public void addAdvertisement(AddAdvertisementDto addAdvertisementDto) {
         Advertisement advertisement = BeanCopyUtils.copyBean(addAdvertisementDto, Advertisement.class);
@@ -110,6 +112,7 @@ public class AdvertisementServiceImpl extends ServiceImpl<AdvertisementMapper, A
         save(advertisement);
     }
 
+    @Transactional
     @Override
     public void updateAdvertisement(UpdateAdvertisementDto updateAdvertisementDto) {
         Advertisement advertisement = getById(updateAdvertisementDto.getId());
@@ -120,6 +123,7 @@ public class AdvertisementServiceImpl extends ServiceImpl<AdvertisementMapper, A
         updateById(advertisement);
     }
 
+    @Transactional
     @Override
     public void deleteAdvertisement(List<Long> ids) {
         if (ids == null || ids.isEmpty()) {

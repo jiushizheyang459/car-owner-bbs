@@ -18,6 +18,7 @@ import com.ori.service.CommentService;
 import com.ori.utils.BeanCopyUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.*;
@@ -166,6 +167,7 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
         parentCommentVo.setChildren(children);
     }
 
+    @Transactional
     @Override
     public void addComment(AddCommentDto addCommentDto) {
         Comment comment = BeanCopyUtils.copyBean(addCommentDto, Comment.class);
@@ -186,6 +188,7 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
         return count;
     }
 
+    @Transactional
     @Override
     public void deleteComment(List<Long> ids) {
         if (ids == null || ids.isEmpty()) {
