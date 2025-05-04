@@ -33,6 +33,11 @@ public class AdvertisementListVo {
     private String img;
 
     /**
+     * 广告优先级（越小越靠前）
+     */
+    private Integer priority;
+
+    /**
      * 描述
      */
     private String description;
