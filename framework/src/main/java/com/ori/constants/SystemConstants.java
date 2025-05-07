@@ -108,4 +108,34 @@ public class SystemConstants {
     public static final int LIKE_CACHE_EXPIRE_DAYS = 7;
 
     public static final String LIKE_CHANGED_ARTICLE_KEY = "article:like:changed";
+
+    /**
+     * 通知类型：文章评论
+     */
+    public static final int NOTIFICATION_TYPE_COMMENT = 1;
+
+    /**
+     * 通知类型：评论回复
+     */
+    public static final int NOTIFICATION_TYPE_REPLY = 2;
+
+    /**
+     * 通知未读状态
+     */
+    public static final int NOTIFICATION_UNREAD = 0;
+
+    /**
+     * 通知已读状态
+     */
+    public static final int NOTIFICATION_READ = 1;
+
+    /**
+     * 通知缓存过期时间（天）
+     */
+    public static final int NOTIFICATION_CACHE_EXPIRE_DAYS = 7;
+
+    /**
+     * 未读通知数量
+     */
+    public static final String UNREAD_COUNT_KEY = "notification:unread:count:";
 }

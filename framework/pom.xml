@@ -94,6 +94,11 @@
             <artifactId>qiniu-java-sdk</artifactId>
             <version>[7.16.0, 7.16.99]</version>
         </dependency>
+        <!-- WebSocket -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-websocket</artifactId>
+        </dependency>
     </dependencies>
 
 </project>

@@ -17,8 +17,6 @@ import java.time.LocalDateTime;
 @ApiModel(description = "添加评论dto")
 public class AddCommentDto {
 
-    private Long id;
-
     /**
      * 评论类型（0代表文章评论，1代表友链评论）
      */

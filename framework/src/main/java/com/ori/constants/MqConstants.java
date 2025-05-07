@@ -30,4 +30,19 @@ public class MqConstants {
      * 文章点赞路由key
      */
     public static final String LIKE_ROUTING_KEY = "article.like.routing.key";
+
+    /**
+     * 通知队列
+     */
+    public static final String NOTIFICATION_QUEUE = "notification.queue";
+
+    /**
+     * 通知交换机
+     */
+    public static final String NOTIFICATION_EXCHANGE = "notification.exchange";
+
+    /**
+     * 通知路由key
+     */
+    public static final String NOTIFICATION_ROUTING_KEY = "notification.routing.key";
 }

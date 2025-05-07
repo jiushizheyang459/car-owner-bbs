@@ -25,7 +25,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/comment")
 @Api(tags = "评论", description = "评论相关接口")
-public class CommentController{
+public class CommentController {
     /**
      * 服务对象
      */
@@ -41,8 +41,8 @@ public class CommentController{
      * @return 分页查询评论结果
      */
     @GetMapping("/commentList")
-    public ResponseResult commentList(Long articleId,Integer pageNum, Integer size) {
-        PageVo vo  = commentService.commentList(SystemConstants.ARTICLE_COMMENT,articleId,pageNum,size);
+    public ResponseResult commentList(Long articleId, Integer pageNum, Integer size) {
+        PageVo vo = commentService.commentList(SystemConstants.ARTICLE_COMMENT,articleId,pageNum,size);
         return ResponseResult.okResult(vo);
     }
 
@@ -82,7 +82,7 @@ public class CommentController{
      * @param id 文章ID
      * @return 文章的评论数量
      */
-    @GetMapping("/commentCount")
+    @GetMapping("/commentCount/{id}")
     public ResponseResult commentCount(@PathVariable("id") Long id) {
         Integer count = commentService.commentCount(id);
         return ResponseResult.okResult(count);

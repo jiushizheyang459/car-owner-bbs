@@ -46,4 +46,22 @@ public class RabbitMQConfig {
     public Binding binding() {
         return BindingBuilder.bind(likeQueue()).to(likeTopicExchange()).with(MqConstants.LIKE_ROUTING_KEY);
     }
+
+    // 定义通知队列
+    @Bean
+    public Queue notificationQueue() {
+        return new Queue(MqConstants.NOTIFICATION_QUEUE, true);
+    }
+
+    // 定义通知交换机
+    @Bean
+    public TopicExchange notificationTopicExchange() {
+        return new TopicExchange(MqConstants.NOTIFICATION_EXCHANGE, true, false);
+    }
+
+    // 绑定通知队列和交换机
+    @Bean
+    public Binding notificationBinding() {
+        return BindingBuilder.bind(notificationQueue()).to(notificationTopicExchange()).with(MqConstants.NOTIFICATION_ROUTING_KEY);
+    }
 }

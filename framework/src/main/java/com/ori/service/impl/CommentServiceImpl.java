@@ -3,8 +3,11 @@ package com.ori.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.ori.constants.MqConstants;
 import com.ori.constants.SystemConstants;
 import com.ori.domain.dto.AddCommentDto;
+import com.ori.domain.dto.NotificationMessageDto;
+import com.ori.domain.entity.Article;
 import com.ori.domain.entity.Category;
 import com.ori.domain.entity.Comment;
 import com.ori.domain.entity.User;
@@ -12,10 +15,12 @@ import com.ori.domain.vo.CommentVo;
 import com.ori.domain.vo.PageVo;
 import com.ori.enums.AppHttpCodeEnum;
 import com.ori.exception.SystemException;
+import com.ori.mapper.ArticleMapper;
 import com.ori.mapper.CommentMapper;
 import com.ori.mapper.UserMapper;
 import com.ori.service.CommentService;
 import com.ori.utils.BeanCopyUtils;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,6 +41,12 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
 
     @Autowired
     private UserMapper userMapper;
+    
+    @Autowired
+    private ArticleMapper articleMapper;
+    
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
 
     /**
      * 分页查询评论
@@ -175,7 +186,46 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
         if (!StringUtils.hasText(comment.getContent())) {
             throw new SystemException(AppHttpCodeEnum.CONTENT_NOT_NULL);
         }
+        
+        // 保存评论
         save(comment);
+
+        // 发送通知
+        if (comment.getToCommentId() == -1) {
+            // 如果是文章评论，通知文章作者
+            Article article = articleMapper.selectById(comment.getArticleId());
+            if (article != null && !article.getCreateById().equals(comment.getCreateById())) {
+                NotificationMessageDto messageDto = new NotificationMessageDto();
+                messageDto.setReceiverId(article.getCreateById());
+                messageDto.setSenderId(comment.getCreateById());
+                messageDto.setType(SystemConstants.NOTIFICATION_TYPE_COMMENT); // 文章评论
+                messageDto.setArticleId(article.getId());
+                messageDto.setCommentId(comment.getId());
+                messageDto.setContent(comment.getContent());
+
+                rabbitTemplate.convertAndSend(
+                    MqConstants.NOTIFICATION_EXCHANGE,
+                    MqConstants.NOTIFICATION_ROUTING_KEY,
+                    messageDto
+                );
+            }
+        } else if (comment.getToCommentUserId() != null && !comment.getToCommentUserId().equals(comment.getCreateById())) {
+            // 如果是评论回复，通知被回复的评论作者
+            NotificationMessageDto messageDto = new NotificationMessageDto();
+            messageDto.setReceiverId(comment.getToCommentUserId());
+            messageDto.setSenderId(comment.getCreateById());
+            messageDto.setType(SystemConstants.NOTIFICATION_TYPE_REPLY); // 评论回复
+            messageDto.setArticleId(comment.getArticleId());
+            messageDto.setCommentId(comment.getToCommentId());
+            messageDto.setReplyId(comment.getId());
+            messageDto.setContent(comment.getContent());
+
+            rabbitTemplate.convertAndSend(
+                MqConstants.NOTIFICATION_EXCHANGE,
+                MqConstants.NOTIFICATION_ROUTING_KEY,
+                messageDto
+            );
+        }
     }
 
     @Override
